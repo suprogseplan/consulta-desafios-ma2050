@@ -464,10 +464,11 @@ function vEnvio(){
     <input type="text" id="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
     <div class="actions">
       <button type="button" class="btn primary" id="btn-enviar">Enviar respostas</button>
-      <button type="button" class="btn" id="btn-copiar">Copiar respostas em texto</button>
+      <button type="button" class="btn" id="btn-copiar" hidden>Copiar respostas em texto</button>
       <button type="button" class="btn" id="btn-baixar" hidden>Baixar arquivo das respostas</button>
     </div>
     <p class="status" id="envio-status" role="status"></p>
+    <p class="status" id="pos-envio">Depois do envio, você poderá copiar ou baixar uma cópia das suas respostas.</p>
     <textarea id="copia-fallback" hidden readonly rows="8"></textarea>
   </section>`;
 }
@@ -668,7 +669,7 @@ function status(msg,cls=''){ const s=document.getElementById('envio-status'); if
 function faltando(){ const f=[]; if(!R.ident.nome.trim()) f.push('nome'); if(!R.ident.inst.trim()) f.push('instituição'); if(!R.ident.camara) f.push('instância da governança'); if(!R.ident.eixo) f.push('eixo de desenvolvimento'); return f; }
 async function enviar(){
   const f=faltando(); if(f.length){ status('Preencha na Apresentação: '+f.join(', ')+'.','err'); return; }
-  if(!/^https:\/\/script\.google\.com\//.test(ENDPOINT)){ status('O envio ainda não foi configurado. Use “Copiar respostas em texto” e envie à equipe da SEPLAN.','err'); return; }
+  if(!/^https:\/\/script\.google\.com\//.test(ENDPOINT)){ status('O envio ainda não foi configurado. Use “Copiar respostas em texto” e envie à equipe da SEPLAN.','err'); envioFalhou=true; liberarCopia(); return; }
   const hp=document.getElementById('hp');
   const b=document.getElementById('btn-enviar'); b.disabled=true; status('Enviando…');
   const ds=Object.values(R.d||{});
@@ -678,7 +679,7 @@ async function enviar(){
   try{ await tentar(); }
   catch(e1){
     try{ await new Promise(r=>setTimeout(r,1200)); await tentar(); }
-    catch(e2){ b.disabled=false; status('Não foi possível enviar agora. Verifique a internet e tente de novo, ou use “Copiar respostas em texto” e envie por e-mail.','err'); return; }
+    catch(e2){ b.disabled=false; envioFalhou=true; liberarCopia(); status('Não foi possível enviar agora. Verifique a internet e tente de novo, ou use “Copiar respostas em texto” e envie por e-mail.','err'); return; }
   }
   b.disabled=false; sentAt=payload.enviadoEm; try{ localStorage.setItem('consulta-ma2050-enviado',sentAt); }catch(e){}
   status('Respostas enviadas em '+new Date(sentAt).toLocaleString('pt-BR')+'. Você pode editar e reenviar neste mesmo navegador: o novo envio substitui o anterior.','ok');
@@ -704,8 +705,10 @@ async function baixarCsv(){
 function envioLead(){
   const el=document.getElementById('envio-lead'); if(!el) return;
   el.textContent = sentAt ? `Você enviou em ${new Date(sentAt).toLocaleString('pt-BR')}. Um novo envio feito neste navegador substitui o anterior.` : 'Ao enviar, suas respostas vão direto para a equipe da SEPLAN. Você pode reenviar depois, neste mesmo navegador, para corrigir.';
-  const bb=document.getElementById('btn-baixar'); if(bb) bb.hidden=false;
+  liberarCopia();
 }
+let envioFalhou=false;
+function liberarCopia(){ const ok=!!sentAt||envioFalhou; ['btn-copiar','btn-baixar'].forEach(i=>{ const x=document.getElementById(i); if(x) x.hidden=!ok; }); const n=document.getElementById('pos-envio'); if(n) n.hidden=ok; }
 
 /* ---------- roteamento ---------- */
 function show(){
