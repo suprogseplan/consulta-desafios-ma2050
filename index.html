@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Consulta Desafios e Diretrizes MA 2050</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: faixa institucional + abas fixas; cada área é uma coluna de fichas de desafio com a cadeia passivo→desafio / ativo→diretriz */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#EEF2F7; --ink:#14223A; --muted:#58657A; --line:#D8DFE8;
+  --brand:#163C6B; --brand-ink:#FFFFFF; --teal:#13879B; --gold:#C98A12; --red:#B23A2E; --green:#2E7D4F;
+  --edu:#C98A12; --eco:#1F5FA8; --amb:#2E7D4F; --soc:#B23A2E; --gov:#4B4FA6;
+  --passivo-bg:#FBEDEB; --passivo-ink:#8E2A20; --ativo-bg:#E6F4F1; --ativo-ink:#0E6B5C;
+  --focus:#13879B; --mast:#163C6B; --mast-ink:#FFFFFF;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1520; --surface:#162131; --surface-2:#1C2A3D; --ink:#E6ECF4; --muted:#9BA8BB; --line:#2B3A50;
+  --brand:#7FB0E6; --brand-ink:#0E1520; --teal:#4CC0D2; --gold:#E3AC45; --red:#E2786B; --green:#6CC08F;
+  --edu:#E3AC45; --eco:#6EA6EA; --amb:#6CC08F; --soc:#E2786B; --gov:#9B9EF0;
+  --passivo-bg:#3A1F1E; --passivo-ink:#F2B2A8; --ativo-bg:#14332E; --ativo-ink:#8FDCCB; --focus:#4CC0D2; --mast:#132A4A; --mast-ink:#E6ECF4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1520; --surface:#162131; --surface-2:#1C2A3D; --ink:#E6ECF4; --muted:#9BA8BB; --line:#2B3A50;
+  --brand:#7FB0E6; --brand-ink:#0E1520; --teal:#4CC0D2; --gold:#E3AC45; --red:#E2786B; --green:#6CC08F;
+  --edu:#E3AC45; --eco:#6EA6EA; --amb:#6CC08F; --soc:#E2786B; --gov:#9B9EF0;
+  --passivo-bg:#3A1F1E; --passivo-ink:#F2B2A8; --ativo-bg:#14332E; --ativo-ink:#8FDCCB; --focus:#4CC0D2; --mast:#132A4A; --mast-ink:#E6ECF4; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+p{margin:0}
+.code{font-family:var(--f-mono);font-size:.78em;letter-spacing:.02em}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* faixa */
+.mast{background:var(--mast);color:var(--mast-ink)}
+.mast .wrap{padding-block:22px 20px;display:grid;gap:6px}
+.eyebrow{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.12em;font-size:.85rem;opacity:.85}
+.mast h1{font-size:clamp(1.8rem,4.5vw,2.6rem);line-height:1.05}
+.mast p{max-width:68ch;opacity:.92}
+
+/* abas */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;padding-block:6px}
+.tab{flex:0 0 auto;border:0;background:transparent;padding:8px 12px;border-radius:6px;font-family:var(--f-display);font-size:1rem;font-weight:600;letter-spacing:.03em;color:var(--muted);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tab:hover{background:var(--surface-2);color:var(--ink)}
+.tab[aria-current="page"]{color:var(--ink);background:var(--surface-2);box-shadow:inset 0 -3px 0 var(--tc,var(--brand))}
+.tab .dot{width:9px;height:9px;border-radius:50%;background:var(--tc,var(--brand))}
+.tab .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-weight:500}
+
+main .wrap{padding-block:24px 64px;display:grid;gap:22px}
+main .wrap>*,.view>*,.card-b>*,.q>*,.lac>*{min-width:0}
+.view{display:grid;gap:22px}
+
+/* blocos */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:14px;min-width:0}
+.panel h2{font-size:1.45rem}
+.lead{color:var(--muted);max-width:72ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+
+/* cadeia lógica */
+.chain{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:8px}
+.chain .node{border-radius:8px;padding:12px;display:grid;gap:4px;align-content:start}
+.chain .node b{font-family:var(--f-display);font-size:1.1rem;letter-spacing:.03em;text-transform:uppercase}
+.chain .node span{font-size:.9rem}
+.chain .arr{align-self:center;font-family:var(--f-display);font-size:1.6rem;color:var(--muted)}
+.n-pas{background:var(--passivo-bg);color:var(--passivo-ink)}
+.n-atv{background:var(--ativo-bg);color:var(--ativo-ink)}
+.n-des{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.n-dir{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.n-prj{background:var(--brand);color:var(--brand-ink)}
+@media (max-width:640px){.chain{grid-template-columns:1fr}.chain .arr{transform:rotate(90deg);justify-self:center;line-height:1}}
+
+/* legenda de situação */
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.sit{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap}
+.sit-persiste{color:var(--red)} .sit-avanco{color:var(--green)} .sit-ampliar{color:var(--gold)} .sit-oportunidade{color:var(--teal)}
+
+/* formulário */
+label.f{display:grid;gap:4px;font-weight:600;font-size:.92rem;min-width:0}
+label.f small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],select,textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%}
+textarea{min-height:76px;resize:vertical}
+.req{color:var(--red)}
+
+/* área */
+.vision{border-left:6px solid var(--ac);background:var(--surface);border-radius:10px;padding:18px 20px;display:grid;gap:6px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.vision .eyebrow{color:var(--ac);opacity:1}
+.vision h2{font-size:1.7rem}
+.vision q{font-style:italic;max-width:70ch;quotes:none}
+
+/* ficha do desafio */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.card-h{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);align-items:start}
+.dnum{font-family:var(--f-display);font-weight:700;font-size:2.2rem;line-height:1;color:var(--ac);min-width:2ch;text-align:right}
+.card-h h3{font-size:1.5rem;line-height:1.15}
+.dlabel{color:var(--ac);opacity:1;font-size:.82rem;font-weight:600}
+.reading b .sit{margin-left:8px;vertical-align:1px;font-family:var(--f-body);font-size:.72rem}
+.card-h .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.done-mark{font-size:.78rem;color:var(--green);font-weight:700}
+.card-b{padding:16px 20px;display:grid;gap:18px}
+.reading{background:var(--surface-2);border-radius:8px;padding:12px 14px;font-size:.95rem}
+.reading b{font-family:var(--f-display);letter-spacing:.06em;text-transform:uppercase;font-size:.85rem;color:var(--muted);display:block;margin-bottom:2px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.links{grid-template-columns:1fr}}
+.links h4,.sec-h{margin:0 0 6px;font-family:var(--f-display);font-weight:600;font-size:.95rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline;border-radius:6px;padding:7px 10px;font-size:.9rem}
+.chip .code{font-weight:500}
+.chip small{display:block;font-size:.8rem;opacity:.85}
+.chip.p{background:var(--passivo-bg);color:var(--passivo-ink)}
+.chip.a{background:var(--ativo-bg);color:var(--ativo-ink)}
+.none{font-size:.88rem;color:var(--muted);font-style:italic}
+
+.dir{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.dir:first-of-type{border-top:0;padding-top:0}
+.dir-t{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.dir-t .code{color:var(--muted);padding-top:2px}
+.q{display:grid;gap:8px;border-top:1px dashed var(--line);padding-top:14px}
+.q-l{font-weight:700;font-size:.95rem}
+
+.seg{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;width:fit-content;max-width:100%}
+.seg button{border:0;border-right:1px solid var(--line);background:var(--surface);padding:7px 12px;font-size:.88rem;font-weight:600;color:var(--muted)}
+.seg button:last-child{border-right:0}
+.seg button:not([aria-pressed="true"]):hover{background:var(--surface-2);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+.seg button[data-v="excluir"][aria-pressed="true"]{background:var(--red);color:#fff}
+.scale button{min-width:40px}
+
+.props{display:grid;gap:6px;font-size:.9rem}
+.props li{display:grid;grid-template-columns:1fr auto;gap:10px}
+.props ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.props .org{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+details.more summary{cursor:pointer;color:var(--teal);font-weight:600;font-size:.9rem}
+
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:.82rem;display:inline-flex;gap:6px;align-items:baseline}
+.pick button .code{font-size:.72rem}
+.pick button[aria-pressed="true"].pp{background:var(--passivo-bg);color:var(--passivo-ink);border-color:currentColor}
+.pick button[aria-pressed="true"].pa{background:var(--ativo-bg);color:var(--ativo-ink);border-color:currentColor}
+
+/* lacunas */
+.lac{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:16px 18px;display:grid;gap:10px;border-left:5px solid var(--ac)}
+.lac h3{font-size:1.2rem}
+.lac .ctx{display:flex;flex-wrap:wrap;gap:6px;font-size:.8rem}
+.mini{border-radius:4px;padding:2px 7px;font-family:var(--f-mono);font-size:.74rem}
+.mini.p{background:var(--passivo-bg);color:var(--passivo-ink)} .mini.a{background:var(--ativo-bg);color:var(--ativo-ink)} .mini.d{background:var(--surface-2);color:var(--ink)}
+.novo{border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;background:var(--surface)}
+.novo-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:9px 14px;font-weight:700}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;color:var(--red);font-weight:600}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:.92rem;color:var(--muted)}
+.status.ok{color:var(--green)} .status.err{color:var(--red)}
+
+/* tabelas de referência */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+
+/* consolidação */
+.bar{display:flex;height:12px;border-radius:3px;overflow:hidden;background:var(--surface-2);min-width:120px}
+.bar span{display:block;height:100%}
+.b-manter{background:var(--green)} .b-ajustar{background:var(--gold)} .b-fundir{background:var(--teal)} .b-excluir{background:var(--red)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.quote{border-left:3px solid var(--line);padding:4px 10px;font-size:.9rem}
+.quote cite{display:block;font-style:normal;font-size:.78rem;color:var(--muted)}
+.kpis{display:flex;flex-wrap:wrap;gap:24px}
+.kpi b{display:block;font-family:var(--f-display);font-size:2rem;line-height:1}
+.kpi span{font-size:.85rem;color:var(--muted)}
+.foot-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.seg button,.tab,.btn{transition:background-color .12s,color .12s}}
+</style>
+</head>
+<body>
+
+
+<header class="mast">
+  <div class="wrap">
+    <div class="eyebrow">Plano Maranhão 2050 · Revisão 2026 · Produto 2.2.2</div>
+    <h1>Consulta às Câmaras Técnicas: Desafios e Diretrizes Estratégicas</h1>
+    <p>Avalie os 22 desafios e as 43 diretrizes do Plano à luz da nova lista de ativos e passivos e aponte o que falta incluir.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Seções da consulta"><div class="wrap" id="tabs"></div></nav>
+<main><div class="wrap" id="app"></div></main>
+
+<script id="dados" type="application/json">{"areas": [{"id": "edu", "nome": "Educação, identidade e cultura transformadoras e estruturantes", "curto": "Educação, identidade e cultura", "visao": "O Maranhão do amanhã será um estado com educação acessível e de qualidade que valoriza a cultura e a identidade como catalisadores de transformação social."}, {"id": "eco", "nome": "Economia próspera e inclusiva", "curto": "Economia", "visao": "O Maranhão do amanhã será um estado com crescimento econômico mais inclusivo, dinâmico e integrado, que gera oportunidades e alavanca sua inserção no mercado nacional e global."}, {"id": "amb", "nome": "Meio ambiente valorizado e resiliente", "curto": "Meio ambiente", "visao": "O Maranhão do amanhã será um estado que respeita o meio ambiente e valoriza sua riqueza natural e saberes originários, aproveitando seu potencial de desenvolvimento para economia verde."}, {"id": "soc", "nome": "Sociedade saudável, segura e justa", "curto": "Sociedade", "visao": "O Maranhão do amanhã será um estado seguro, que cuida da população e gera maior igualdade de oportunidades e qualidade de vida."}, {"id": "gov", "nome": "Governança efetiva, inovadora e conectada", "curto": "Governança", "visao": "O Maranhão do amanhã será um estado estruturado e inovador, com gestão pública profissional e eficiente, que garante cooperação interfederativa entre os setores da sociedade."}], "ativos": [{"id": "A1", "nome": "Posição logística nacional, infraestrutura multimodal e potencial portuário", "sit": "Mantido e ampliado", "ind": "Itaqui: 36,7 mi t em 2025; 175,2 bi TKU de carga ferroviária (ANTAQ/ANTT)"}, {"id": "A2", "nome": "Potencial turístico elevado e diversidade cultural material e imaterial", "sit": "Fusão e reformulação", "ind": "10 polos e 54 municípios turísticos; São João movimentou R$ 415 mi em 2025 (IMESC)"}, {"id": "A3", "nome": "Ativos marítimos e costeiros e desenvolvimento sustentável", "sit": "Novo", "ind": "640 km de litoral (2º do país); 36% dos manguezais do Brasil (ICMBio)"}, {"id": "A4", "nome": "Agricultura familiar e arranjos produtivos regionais", "sit": "Fusão e reformulação", "ind": "85,1% dos estabelecimentos rurais são de agricultura familiar (Censo Agro 2017)"}, {"id": "A5", "nome": "Base empreendedora e apoio aos pequenos negócios", "sit": "Novo", "ind": "64.017 empresas abertas em 2025, +70,9% sobre 2019 (IMESC)"}, {"id": "A6", "nome": "Institucionalização do planejamento de longo prazo, metas e monitoramento", "sit": "Novo", "ind": "Capag A em 2025; gestão pública passou da 20ª para a 9ª posição (CLP)"}, {"id": "A7", "nome": "Capacidade de pesquisa, desenvolvimento e inovação aplicada", "sit": "Novo", "ind": "3.025 matrículas em mestrado e doutorado; 5º em pós-graduandos com bolsa (CLP 2026)"}, {"id": "A8", "nome": "Fontes diversificadas de energia e potencial de transição energética", "sit": "Mantido e ampliado", "ind": "4.975 MW instalados, com exportação líquida ao SIN (EPE 2026)"}, {"id": "A9", "nome": "Cadeias de produção agroindustrial, pecuária e aquicultura", "sit": "Novo", "ind": "VA agropecuário de 8,7% da economia, contra 4,9% no Brasil (IBGE 2024)"}, {"id": "A10", "nome": "Biomas de alta biodiversidade", "sit": "Mantido e atualizado", "ind": "Cerrado 65% e Amazônia 34% do território; 19% sob unidades de conservação"}, {"id": "A11", "nome": "Ampla disponibilidade de recursos hídricos", "sit": "Mantido e atualizado", "ind": "11 bacias hidrográficas e 7 rios genuinamente maranhenses (IMESC/ANA)"}, {"id": "A12", "nome": "Rede descentralizada de escolas técnicas", "sit": "Mantido e ampliado", "ind": "IEMA passou de 34 para 58 unidades plenas entre 2023 e 2026"}], "passivos": [{"id": "P1", "nome": "Elevado índice de pobreza e extrema pobreza", "sit": "Mantido e atualizado", "ind": "Pobreza 45,8% e extrema pobreza 10,1% em 2024, a maior do país (IBGE)"}, {"id": "P2", "nome": "Baixa qualidade educacional, qualificação técnico-profissional insuficiente e infraestrutura escolar desigual", "sit": "Mantido e ampliado", "ind": "Analfabetismo 10,9% (2025); internet para alunos em 21,2% das escolas públicas (INEP)"}, {"id": "P3", "nome": "Pressões urbanas, ocupação irregular e saneamento insuficiente", "sit": "Reformulado e desmembrado", "ind": "Só 28,0% do lixo com processamento adequado em 2024 (SINISA)"}, {"id": "P4", "nome": "Degradação de biomas e perda de serviços ecossistêmicos", "sit": "Reformulado e desmembrado", "ind": "3.714 km² desmatados em 2024 contra 2.222 ha em recuperação (MapBiomas)"}, {"id": "P5", "nome": "Baixa habitabilidade e déficit de saneamento", "sit": "Mantido e ampliado", "ind": "30,0% dos domicílios com saneamento adequado (Nordeste: 50,8%) em 2025"}, {"id": "P6", "nome": "Persistência da informalidade e heterogeneidade do mercado de trabalho", "sit": "Mantido e ampliado", "ind": "56% de ocupados informais (Brasil: 43,5%) em 2022 (IBGE)"}, {"id": "P7", "nome": "Desmatamento, queimadas, degradação ambiental e fragilidade do manejo integrado do fogo", "sit": "Reformulado", "ind": "25.545 km² queimados em 2025; densidade de focos 4,6 vezes a do Brasil (INPE/MapBiomas)"}, {"id": "P8", "nome": "Desigualdade de acesso a direitos e serviços por grupos vulnerabilizados", "sit": "Novo", "ind": "Analfabetismo de 34,5% entre pessoas com deficiência (sem deficiência: 11,4%)"}, {"id": "P9", "nome": "Baixa qualidade e alta dependência da gestão municipal", "sit": "Mantido e atualizado", "ind": "184 dos 217 municípios têm 90% ou mais da receita vinda de transferências (Siconfi)"}, {"id": "P10", "nome": "Gargalos na infraestrutura e logística", "sit": "Mantido e atualizado", "ind": "Só 10,5% da malha rodoviária em condição boa ou ótima, a pior do país (CNT 2025)"}, {"id": "P11", "nome": "Concentração espacial do crescimento e desigualdades regionais", "sit": "Mantido e ampliado", "ind": "São Luís responde por 28,4% do PIB; 5 maiores municípios, 46,1% (IMESC 2023)"}, {"id": "P12", "nome": "Insegurança fundiária, conflitos de terra e ameaça às populações tradicionais", "sit": "Mantido e ampliado", "ind": "363 conflitos por terra em 2024, 1º do Brasil (CPT)"}, {"id": "P13", "nome": "Alta mortalidade infantil, materno-infantil e baixa atenção à saúde", "sit": "Mantido e ampliado", "ind": "Mortalidade infantil 13,9 por mil (Brasil: 12,2); materna 77,6 por 100 mil (Brasil: 53,5)"}, {"id": "P14", "nome": "Desigualdades raciais e de gênero em educação, renda, trabalho e saúde", "sit": "Novo", "ind": "89,1% dos beneficiários do CadÚnico no MA são negros (IMESC 2023)"}, {"id": "P15", "nome": "Baixa competitividade, adensamento produtivo e concentração regional da produção", "sit": "Fusão e reformulação", "ind": "26º lugar no Índice de Complexidade Econômica em 2025 (era 23º em 2024)"}, {"id": "P16", "nome": "Acesso limitado à internet", "sit": "Mantido e atualizado", "ind": "13,0 acessos de banda larga fixa por 100 habitantes, metade da média nacional (Anatel 2025)"}, {"id": "P17", "nome": "Elevado contingente de jovens que não estudam nem trabalham", "sit": "Mantido e atualizado", "ind": "23,8% de jovens nem-nem-nem em 2025 (Brasil: 14,6%)"}, {"id": "P18", "nome": "Baixa capacidade de inovação", "sit": "Mantido e atualizado", "ind": "24º lugar no pilar Inovação do Ranking de Competitividade (CLP 2026)"}], "desafios": [{"n": 1, "area": "edu", "t": "Ampliar o acesso ao ensino e garantir infraestrutura adequada em todo o estado", "dir": ["Implementar políticas públicas que promovam condições básicas de acesso, acessibilidade e permanência para todos os alunos e alunas (transporte, material, alimentação, saneamento, higiene, tecnologia), sobretudo nas regiões com maior desigualdade e difícil mobilidade.", "Fortalecer o regime de colaboração com os municípios para assegurar a oferta de educação em todos os níveis de ensino, promovendo a gestão e coordenação das atividades educacionais por todo o estado."], "pas": ["P2", "P16"], "atv": [], "leitura": "A infraestrutura escolar básica chegou a 94,8% em 2025, perto do Nordeste (95,2%), mas a pedagógica segue desigual: 8,6% das escolas públicas têm esgoto, 8,1% laboratório de informática e 21,2% internet para alunos.", "sit": "persiste", "prop": [{"t": "Infraestrutura escolar, transporte, alimentação e conectividade", "o": "FIEMA", "s": 57.8}], "nprop": 1}, {"n": 2, "area": "edu", "t": "Alavancar a qualidade e o desempenho escolar entre crianças, jovens e adultos", "dir": ["Promover a oferta de ensino de qualidade em todas as idades, que estimule o pleno desenvolvimento, a autonomia, o pensamento crítico e que valorize elementos culturais e de identidade, alavancando os indicadores educacionais e assegurando uma educação transformadora e inclusiva.", "Investir na valorização e reconhecimento dos docentes e incentivar a formação pedagógica e aperfeiçoamento para atuação em territórios de identidade e em situação de vulnerabilidade."], "pas": ["P2", "P17"], "atv": [], "leitura": "Analfabetismo de 10,9% em 2025 e apenas 26,5% dos docentes dos anos finais com formação adequada. O passivo foi mantido e ampliado na revisão.", "sit": "persiste", "prop": [{"t": "Educação empreendedora integrada ao ensino fundamental e médio", "o": "SEBRAE", "s": 60.0}, {"t": "Infraestrutura escolar, transporte, alimentação e conectividade", "o": "FIEMA", "s": 57.8}, {"t": "Currículo, gestão escolar e formação docente alinhados ao mundo do trabalho", "o": "FIEMA", "s": 56.0}], "nprop": 3}, {"n": 3, "area": "edu", "t": "Ampliar a oferta do ensino superior e profissionalizante e promover aprendizagem inovadora e a pesquisa científica e tecnológica conectada com vocações regionais", "dir": ["Assegurar uma educação de caráter emancipatório e incorporar nos planos pedagógicos aspectos que dialoguem com os elementos regionais e projetos de futuro.", "Ampliar a oferta, a infraestrutura e a qualidade do ensino médio e da educação profissional e técnica em todo o estado, garantindo consonância com a evolução das tecnologias e do mundo do trabalho.", "Fortalecer o sistema de ensino superior e profissionalizante e estimular políticas que promovam o desenvolvimento científico e tecnológico."], "pas": ["P2", "P18"], "atv": ["A12", "A7"], "leitura": "A rede IEMA passou de 34 para 58 unidades (2023–2026), mas só 12,9% da população com 25 anos ou mais tem nível superior (2025). Há avanço, apoiado em dois ativos.", "sit": "avanco", "prop": [{"t": "Educação empreendedora integrada ao ensino fundamental e médio", "o": "SEBRAE", "s": 60.0}, {"t": "Educação profissional regionalizada, EJA integrada e formação técnica", "o": "FIEMA", "s": 57.6}, {"t": "Escolas conectadas a ecossistemas de inovação, universidades e arranjos produtivos locais", "o": "SEBRAE", "s": 57.6}, {"t": "Formação STEM, educação executiva e aprendizagem industrial", "o": "FIEMA", "s": 57.6}], "nprop": 9}, {"n": 4, "area": "edu", "t": "Garantir o reconhecimento e a centralidade das pautas de diversidade e dos povos e comunidades tradicionais", "dir": ["Criar e fortalecer políticas públicas que garantam a proteção dos direitos dos povos e comunidades tradicionais, o bem-estar e a oferta singularizada de serviços, assim como o respeito às suas tradições.", "Formular e fortalecer políticas públicas intersetoriais voltadas para promover igualdade de gênero, étnico-racial, que respeite as tradições e manifestações culturais, que combata o racismo institucional, a violência contra pessoas LGBTQIAP+ e a intolerância religiosa."], "pas": ["P8", "P12", "P14"], "atv": ["A2"], "leitura": "854 comunidades quilombolas certificadas e 363 conflitos por terra em 2024 (1º do país). Dois passivos novos (P8 e P14) ampliam o escopo deste desafio.", "sit": "ampliar", "prop": [{"t": "Acessibilidade e inclusão de públicos e comunidades tradicionais nos destinos turísticos", "o": "SEBRAE", "s": 56.8}, {"t": "Capacitação e juventudes indígenas em atividades sustentáveis", "o": "IPAM", "s": 56.0}], "nprop": 2}, {"n": 5, "area": "edu", "t": "Promover maior visibilidade para a cultura produzida pelo povo maranhense em suas mais diversas expressões", "dir": ["Desenvolver e consolidar políticas públicas que expandam a salvaguarda do patrimônio material, imaterial, histórico e artístico do estado.", "Valorizar e impulsionar as diversas expressões culturais e manifestações artísticas maranhenses, ampliando sua visibilidade e reconhecimento, levando em conta as oportunidades de acesso e fruição."], "pas": [], "atv": ["A2"], "leitura": "Desafio de oportunidade, sem passivo associado: Bumba meu boi é patrimônio imaterial da UNESCO e o São João movimentou R$ 415 mi em 2025. Falta indicador cultural de monitoramento.", "sit": "oportunidade", "prop": [{"t": "Acesso à cultura e ao desporto para trabalhadores e dependentes", "o": "FIEMA", "s": 48.9}], "nprop": 1}, {"n": 6, "area": "eco", "t": "Integrar a cadeia logística, expandir e melhorar a infraestrutura", "dir": ["Aumentar a integração entre os modais de transporte, observando os níveis de produção de cada região ou localidade de forma a facilitar o escoamento da produção.", "Realizar obras de ampliação e melhoria da infraestrutura pertinente à oferta de serviços públicos, identificando as necessidades de cada região em relação a transporte, saneamento básico e energia elétrica.", "Ampliar a cobertura de internet em todo o estado, inclusive em assentamentos rurais e nos territórios de povos e comunidades tradicionais."], "pas": ["P10", "P16"], "atv": ["A1", "A3"], "leitura": "O complexo do Itaqui é o maior do Nordeste, mas só 10,5% das rodovias estão em condição boa ou ótima, o pior resultado do país (CNT 2025).", "sit": "persiste", "prop": [{"t": "Portos, navegação, infraestrutura aquaviária e logística sustentável", "o": "SEINC", "s": 64.2}, {"t": "Infraestrutura multimodal: rodovias, ferrovias, portos, hidrovias e aeroportos", "o": "FIEMA", "s": 61.4}], "nprop": 2}, {"n": 7, "area": "eco", "t": "Ampliar o acesso e reduzir disparidades do mercado de trabalho", "dir": ["Garantir a oferta descentralizada e a qualidade da formação profissional de forma articulada com as demandas do desenvolvimento socioeconômico e ambiental do estado.", "Ampliar e fortalecer a realização de ações de apoio à inclusão produtiva com foco em grupos e comunidades em situação de vulnerabilidade socioeconômica."], "pas": ["P6", "P17"], "atv": ["A4", "A5"], "leitura": "Informalidade de 56% (2022) e diferença de 61% na renda formal entre a Grande São Luís e o Médio Parnaíba. Saldo de 31.713 empregos formais em 2025.", "sit": "persiste", "prop": [{"t": "Selo Azul e empreendedorismo de produtos e serviços locais", "o": "SEINC", "s": 67.2}, {"t": "Formalização de empresas e empregos e apoio a arranjos produtivos locais", "o": "FIEMA", "s": 62.0}, {"t": "Formalização de MPEs e estruturação de roteiros, produtos e serviços turísticos", "o": "SEBRAE", "s": 62.0}, {"t": "Crédito, garantias e investimento para inovação e formalização de pequenos negócios", "o": "SEBRAE", "s": 59.8}], "nprop": 4}, {"n": 8, "area": "eco", "t": "Elevar o valor agregado da produção e promover maior diversificação produtiva", "dir": ["Concentrar recursos no fortalecimento das cadeias produtivas do agronegócio, da agricultura familiar, da indústria e dos serviços avançados, da energia, da bioeconomia e do turismo, que possuem maior potencial de alavancar o desenvolvimento socioeconômico do estado."], "pas": ["P15"], "atv": ["A1", "A2", "A3", "A4", "A5", "A9"], "leitura": "O estado caiu para o 26º lugar no Índice de Complexidade Econômica; soja e milho ocupam 87% da área plantada. É o desafio com mais ativos vinculados e só uma diretriz.", "sit": "ampliar", "prop": [{"t": "Mapeamento de potencialidades regionais, cadeias produtivas e fundo de royalties", "o": "FIEMA", "s": 68.5}, {"t": "Programa Maranhão Azul, adesão ao Selo, clusters prioritários e Fundo Azul ESG", "o": "SEINC", "s": 68.5}, {"t": "Selo Azul e empreendedorismo de produtos e serviços locais", "o": "SEINC", "s": 67.2}, {"t": "Destinos Turísticos Inteligentes: diversificação da oferta, inovação e competitividade", "o": "SEBRAE", "s": 66.2}], "nprop": 15}, {"n": 9, "area": "eco", "t": "Aumentar a atratividade do ambiente de negócios e a capacidade de inovação", "dir": ["Promover segurança jurídica, simplificação de processos e oferta de incentivos a fim de melhorar a qualidade do ambiente de negócios e atrair investimentos para o estado.", "Fortalecer o setor de pesquisa, desenvolvimento e inovação, visando impulsionar a competitividade maranhense."], "pas": ["P15", "P18"], "atv": ["A1", "A2", "A3", "A5", "A7"], "leitura": "64.017 empresas abertas em 2025 (+70,9% sobre 2019) e tempo de abertura de 15 horas; mas o estado ocupa o 24º lugar no pilar Inovação (CLP 2026).", "sit": "avanco", "prop": [{"t": "Programa Maranhão Azul, adesão ao Selo, clusters prioritários e Fundo Azul ESG", "o": "SEINC", "s": 68.5}, {"t": "Destinos Turísticos Inteligentes: diversificação da oferta, inovação e competitividade", "o": "SEBRAE", "s": 66.2}, {"t": "Ecossistema de inovação, P&D aplicado, biotecnologia e startups", "o": "FIEMA", "s": 66.0}, {"t": "Incentivos tributários, ZPE e competitividade industrial", "o": "FIEMA", "s": 65.0}], "nprop": 14}, {"n": 10, "area": "eco", "t": "Reduzir a desigualdade regional e a concentração espacial da produção", "dir": ["Acentuar o critério territorial nas estratégias de promoção de investimentos, reconhecendo os ativos e potencialidades característicos de cada região, respeitando as populações locais e estimulando a geração de emprego e renda nas regiões menos desenvolvidas.", "Promover o desenvolvimento sustentável e integrado, visando melhorar a qualidade de vida da população em todas as regiões do estado e impulsionar a valorização de seus recursos naturais."], "pas": ["P6", "P11", "P15"], "atv": ["A3", "A4", "A9"], "leitura": "PIB cresceu 3,6% em 2023, mas o eixo dinâmico se deslocou para o sul e sudoeste; os 5 maiores municípios concentram 46,1% do PIB.", "sit": "persiste", "prop": [{"t": "Mapeamento de potencialidades regionais, cadeias produtivas e fundo de royalties", "o": "FIEMA", "s": 68.5}, {"t": "Programa Maranhão Azul, adesão ao Selo, clusters prioritários e Fundo Azul ESG", "o": "SEINC", "s": 68.5}, {"t": "Selo Azul e empreendedorismo de produtos e serviços locais", "o": "SEINC", "s": 67.2}, {"t": "Destinos Turísticos Inteligentes: diversificação da oferta, inovação e competitividade", "o": "SEBRAE", "s": 66.2}], "nprop": 5}, {"n": 11, "area": "amb", "t": "Reduzir os índices de desmatamento e queimadas e aumentar a proteção e recuperação dos biomas", "dir": ["Fortalecer mecanismos de monitoramento, fiscalização, controle e prevenção do desmatamento e das queimadas ilegais de maneira articulada em todo o território estadual.", "Promover ações de reflorestamento e recuperação de áreas degradadas dos biomas e matas ciliares, fortalecendo os corredores remanescentes de vegetação nativa."], "pas": ["P4", "P7"], "atv": ["A10"], "leitura": "3.714 km² desmatados em 2024 e 25.545 km² queimados em 2025 (cerca de 20% da área queimada do país). O passivo foi reformulado para incluir o manejo integrado do fogo.", "sit": "ampliar", "prop": [{"t": "Eixo II - monitoramento e controle ambiental", "o": "IPAM", "s": 66.0}, {"t": "Recuperação ambiental, conservação de florestas em pé e REDD+/PSA", "o": "IPAM", "s": 65.5}, {"t": "Cidades costeiras resilientes, adaptação climática e preservação de ecossistemas", "o": "SEINC", "s": 61.9}, {"t": "PPCDQ-MA e Plano ABC+ como referências para a agenda ambiental", "o": "Escuta Técnica", "s": 55.2}], "nprop": 6}, {"n": 12, "area": "amb", "t": "Estruturar a gestão dos recursos naturais e mitigar impactos decorrentes das mudanças climáticas", "dir": ["Consolidar estratégia de melhoria da gestão de recursos hídricos e florestais e promover a universalização do saneamento ampliando a coleta e o tratamento de esgoto urbano e rural e garantindo o acesso e a qualidade da água.", "Criar e implementar projetos de caráter transversal para adaptação e mitigação dos impactos das mudanças climáticas."], "pas": ["P3", "P4", "P5"], "atv": ["A11"], "leitura": "Só 30% dos domicílios têm saneamento adequado (Nordeste: 50,8%) e o processamento adequado do lixo caiu de 46,3% para 28,0% entre 2019 e 2024.", "sit": "persiste", "prop": [{"t": "Eixo II - monitoramento e controle ambiental", "o": "IPAM", "s": 66.0}, {"t": "Recuperação ambiental, conservação de florestas em pé e REDD+/PSA", "o": "IPAM", "s": 65.5}, {"t": "Descarbonização industrial, hidrogênio verde, etanol e eficiência energética", "o": "FIEMA", "s": 63.0}, {"t": "Programa Estadual de Créditos de Carbono, REDD+ e pagamentos por serviços ambientais", "o": "MAPA", "s": 63.0}], "nprop": 14}, {"n": 13, "area": "amb", "t": "Melhorar a gestão territorial e estimular intercâmbio de saberes populares e tradicionais", "dir": ["Promover regularização fundiária e ambiental e garantir mecanismos de denúncia e combate a crimes ambientais.", "Reconhecer, valorizar e ampliar o diálogo intercultural e o intercâmbio de conhecimentos entre diferentes grupos e comunidades."], "pas": ["P3", "P12"], "atv": [], "leitura": "O estado lidera os conflitos por terra no país (363 em 2024; 190 em 2025). Este desafio ainda não tem indicador no Diagnóstico Socioeconômico 2026.", "sit": "persiste", "prop": [{"t": "Eixo I - regularização ambiental e ordenamento fundiário", "o": "IPAM", "s": 64.2}, {"t": "Sociobioeconomia, certificação de origem e rotas de bioeconomia e turismo criativo", "o": "SEBRAE", "s": 63.0}, {"t": "Manejo integrado e valorização de conhecimento tradicional em comunidades", "o": "IPAM", "s": 53.6}], "nprop": 3}, {"n": 14, "area": "amb", "t": "Potencializar o desenvolvimento da economia verde e transversalizar a educação ambiental", "dir": ["Desenvolver a economia verde e a capacitação da mão de obra e infraestrutura verde para garantir o aproveitamento das potencialidades naturais e geográficas do estado.", "Difundir educação ambiental integrada em todos os níveis de educação e as áreas de conhecimento."], "pas": [], "atv": ["A8", "A10", "A3"], "leitura": "Desafio de oportunidade: 4.975 MW instalados com exportação de energia, eólica no Delta e potencial de hidrogênio. A transição energética e a economia azul aparecem só de forma indireta.", "sit": "ampliar", "prop": [{"t": "Eixo IV - instrumentos econômicos e financeiros", "o": "IPAM", "s": 69.8}, {"t": "Eixo III - fomento a atividades sustentáveis e de baixo impacto", "o": "IPAM", "s": 66.0}, {"t": "Recuperação ambiental, conservação de florestas em pé e REDD+/PSA", "o": "IPAM", "s": 65.5}, {"t": "Descarbonização industrial, hidrogênio verde, etanol e eficiência energética", "o": "FIEMA", "s": 63.0}], "nprop": 17}, {"n": 15, "area": "soc", "t": "Reduzir a desigualdade no acesso a direitos fundamentais, pobreza e escassez de oportunidades", "dir": ["Fortalecer e aprimorar o Sistema de Proteção Social, promovendo a sua integralidade, universalidade, excelência e maior efetividade em todas as regiões do estado.", "Assegurar a oferta descentralizada e acessível de serviços públicos essenciais à vida, garantindo o acesso a moradia e saneamento adequados, e melhoria da qualidade de vida da população maranhense.", "Promover a inclusão, a autonomia socioeconômica e a mobilidade social de grupos em situação de vulnerabilidade, com ênfase nas áreas de maior concentração de pobreza e extrema pobreza."], "pas": ["P1", "P5", "P8", "P14"], "atv": [], "leitura": "A pobreza caiu de 65,7% (2021) para 45,8% (2024), mas a extrema pobreza, de 10,1%, ainda é a maior do país. É o desafio com mais passivos vinculados.", "sit": "persiste", "prop": [{"t": "Inclusão socioprodutiva de mulheres, jovens, população negra, indígenas e pessoas com deficiência", "o": "SEBRAE", "s": 63.0}, {"t": "Diversidade, inclusão produtiva e equidade de gênero", "o": "FIEMA", "s": 61.9}, {"t": "Acessibilidade e inclusão de públicos e comunidades tradicionais nos destinos turísticos", "o": "SEBRAE", "s": 56.8}, {"t": "Segurança alimentar com pescado regional e inclusão socioprodutiva", "o": "SAGRIMA", "s": 54.4}], "nprop": 4}, {"n": 16, "area": "soc", "t": "Assegurar o pleno desenvolvimento da infância e da juventude", "dir": ["Fortalecer o Sistema de Garantia de Direitos da Criança e do Adolescente, garantindo a melhoria e efetividade de políticas públicas de atenção integral, saúde, educação, segurança alimentar e prevenção a situações de vulnerabilidade infantil e juvenil."], "pas": ["P13", "P17"], "atv": [], "leitura": "23,8% dos jovens de 15 a 29 anos não estudam, não trabalham nem procuram emprego (Brasil: 14,6%). O desafio tem uma única diretriz.", "sit": "persiste", "prop": [{"t": "Inclusão socioprodutiva de mulheres, jovens, população negra, indígenas e pessoas com deficiência", "o": "SEBRAE", "s": 63.0}, {"t": "Diversidade, inclusão produtiva e equidade de gênero", "o": "FIEMA", "s": 61.9}], "nprop": 2}, {"n": 17, "area": "soc", "t": "Ampliar o acesso e melhorar a qualidade dos serviços de saúde", "dir": ["Fortalecer a rede de atenção básica de saúde, de forma integral e regionalizada, ampliando sua cobertura e a qualidade dos serviços, com foco na população usuária do SUS e ênfase em ações de prevenção, promoção e cuidado da saúde e bem-estar físico, mental e social em todas as fases da vida.", "Ampliar e fortalecer a rede estadual de atendimento especializado de média e alta complexidade, garantindo o acesso equitativo, a excelência dos serviços e o atendimento adequado às necessidades de saúde da população."], "pas": ["P8", "P13", "P14"], "atv": [], "leitura": "Mortalidade infantil de 13,9 por mil (Brasil: 12,2) e materna de 77,6 por 100 mil (Brasil: 53,5); 50,5% dos óbitos infantis ocorrem nos primeiros 6 dias de vida.", "sit": "persiste", "prop": [{"t": "Saúde, segurança ocupacional e infraestrutura de atenção básica", "o": "FIEMA", "s": 54.4}], "nprop": 1}, {"n": 18, "area": "soc", "t": "Reduzir a violência e criminalidade no campo e na cidade", "dir": ["Fortalecer a atuação preventiva, combativa e corretiva das instituições de segurança e justiça em todo o estado, promovendo integração e reestruturação do sistema de segurança e defesa social, visando combater todas as expressões de violência e criminalidade no território estadual."], "pas": ["P8", "P12"], "atv": [], "leitura": "A taxa de CVLI caiu de 31,3 para 26,9 por 100 mil (2015–2025), queda menor que a do Nordeste. A violência no campo segue em alta.", "sit": "persiste", "prop": [{"t": "Segurança em eixos logísticos, áreas industriais e redução de roubos de carga", "o": "FIEMA", "s": 56.6}], "nprop": 1}, {"n": 19, "area": "gov", "t": "Institucionalizar e aumentar a profissionalização da gestão pública", "dir": ["Consolidar cultura de planejamento que democratize, fortaleça e integre os instrumentos de planejamento, orçamento e gestão e institucionalize o monitoramento e a avaliação das políticas públicas.", "Promover Gestão Estratégica de Pessoas, valorizando e profissionalizando os quadros da gestão pública."], "pas": ["P9"], "atv": ["A6"], "leitura": "Maior avanço do país em gestão pública (20ª para 9ª posição, CLP 2023–2025) e lei própria do Plano Maranhão 2050. O passivo municipal ainda persiste.", "sit": "avanco", "prop": [{"t": "Sistemas integrados, IA, ciência de dados e desmaterialização da gestão administrativa", "o": "EGMA", "s": 71.8}, {"t": "Gestão fiscal por resultados, investimentos e fundo garantidor para PPPs", "o": "FIEMA", "s": 69.8}, {"t": "Desburocratização e governo digital", "o": "FIEMA", "s": 69.0}, {"t": "Estado empreendedor: simplificação regulatória, Sala Estadual digital e observatório de pequenos negócios", "o": "SEBRAE", "s": 69.0}], "nprop": 10}, {"n": 20, "area": "gov", "t": "Fortalecer a governança compartilhada e as redes de cooperação", "dir": ["Implementar modelo de governança que expanda e impulsione os espaços de interlocução entre órgãos e entidades da administração pública, unidades federativas e com a sociedade, institucionalizando a cultura de atuação multissetorial e aprimorando a coordenação das ações governamentais.", "Aperfeiçoar o sistema de controle interno e externo, ampliar a participação social e promover transparência, de modo a garantir a ampla fiscalização dos atos governamentais e o envolvimento da população na formulação e no monitoramento de políticas públicas."], "pas": ["P9"], "atv": ["A6"], "leitura": "184 dos 217 municípios dependem de transferências para 90% ou mais da receita. Este desafio ainda não tem indicador no Diagnóstico Socioeconômico 2026.", "sit": "persiste", "prop": [{"t": "Governança territorial com poder público, setor produtivo, universidades e sociedade civil", "o": "SEBRAE", "s": 69.0}, {"t": "Instâncias de Governança Regional, COMTURs e planos municipais de turismo", "o": "SEBRAE", "s": 69.0}, {"t": "Profissionalização da gestão, transparência, integridade e combate à corrupção", "o": "FIEMA", "s": 69.0}, {"t": "REURB com Caxias e Imperatriz: cadastro social, georreferenciamento, titulação e mobilização comunitária", "o": "MAPA", "s": 69.0}], "nprop": 12}, {"n": 21, "area": "gov", "t": "Estimular a capacidade de inovação e a utilização de recursos digitais", "dir": ["Promover a inovação em rede e garantir um ambiente propício à inovação e à experimentação voltados para a promoção de soluções públicas.", "Ofertar serviços públicos de maneira digital e automatizada, utilizando novas ferramentas voltadas para a otimização do trabalho e redução de custos."], "pas": ["P16", "P18"], "atv": ["A6", "A7"], "leitura": "O estado subiu do 24º para o 18º lugar no índice de serviços públicos digitais (2022–2025), mas a banda larga fixa é metade da média nacional.", "sit": "avanco", "prop": [{"t": "Sistemas integrados, IA, ciência de dados e desmaterialização da gestão administrativa", "o": "EGMA", "s": 71.8}, {"t": "Desburocratização e governo digital", "o": "FIEMA", "s": 69.0}, {"t": "Estado empreendedor: simplificação regulatória, Sala Estadual digital e observatório de pequenos negócios", "o": "SEBRAE", "s": 69.0}, {"t": "Governança territorial com poder público, setor produtivo, universidades e sociedade civil", "o": "SEBRAE", "s": 69.0}], "nprop": 8}, {"n": 22, "area": "gov", "t": "Elevar a autonomia fiscal e a captação de recursos", "dir": ["Fortalecer a responsabilidade fiscal, garantindo maior grau de confiança, atraindo mais recursos para o estado e assegurando a capacidade de investimento necessária para a realização de políticas públicas."], "pas": ["P9"], "atv": ["A6"], "leitura": "Capag A em 2025 e dívida líquida de 5,4% da receita corrente líquida (era 41,2% em 2022). O ativo fiscal saiu da lista final, mas a captação segue estratégica.", "sit": "avanco", "prop": [{"t": "Eixo IV - instrumentos econômicos e financeiros", "o": "IPAM", "s": 69.8}, {"t": "Gestão fiscal por resultados, investimentos e fundo garantidor para PPPs", "o": "FIEMA", "s": 69.8}, {"t": "Mapeamento de potencialidades regionais, cadeias produtivas e fundo de royalties", "o": "FIEMA", "s": 68.5}, {"t": "Estabilidade regulatória e segurança jurídica para investimentos de longo prazo", "o": "SEINC", "s": 65.0}], "nprop": 5}], "lacunas": [{"id": "L1", "area": "edu", "t": "Desigualdades raciais e de gênero (P14) e acesso de grupos vulnerabilizados, como pessoas com deficiência (P8)", "txt": "Os dois passivos são novos. Só a diretriz 4.2 trata de igualdade de gênero e étnico-racial, e nenhuma diretriz trata de acessibilidade e inclusão de pessoas com deficiência.", "pas": ["P8", "P14"], "des": ["D4", "D15"]}, {"id": "L2", "area": "edu", "t": "Conectividade e recursos digitais nas escolas", "txt": "A internet para alunos chega a 21,2% das escolas públicas. A diretriz 1.1 cita tecnologia de forma genérica.", "pas": ["P2", "P16"], "des": ["D1"]}, {"id": "L3", "area": "eco", "t": "Economia do mar (economia azul) como vetor de diversificação", "txt": "Ativo novo (A3) com 2º maior litoral do país e 36% dos manguezais. Nenhum desafio ou diretriz cita a economia do mar.", "pas": ["P15", "P11"], "des": ["D8", "D10", "D14"]}, {"id": "L4", "area": "eco", "t": "Formalização de trabalhadores e pequenos negócios", "txt": "A informalidade (P6) foi mantida e ampliada, mas as diretrizes do desafio 7 tratam de formação e inclusão produtiva, sem citar formalização. A base empreendedora (A5) é ativo novo.", "pas": ["P6"], "des": ["D7", "D9"]}, {"id": "L5", "area": "eco", "t": "Turismo como cadeia estratégica própria", "txt": "O ativo A2 foi reformulado com destaque a 10 polos turísticos, mas o turismo aparece só como um item da lista da diretriz 8.1.", "pas": ["P15"], "des": ["D5", "D8"]}, {"id": "L6", "area": "amb", "t": "Manejo integrado do fogo", "txt": "O passivo P7 foi reformulado para incluir a fragilidade do manejo do fogo. A diretriz 11.1 trata de queimadas ilegais, mas não de manejo, prevenção comunitária e brigadas.", "pas": ["P7"], "des": ["D11"]}, {"id": "L7", "area": "amb", "t": "Cidades resilientes: ocupação irregular, resíduos sólidos e drenagem", "txt": "O passivo P3 é novo na forma desmembrada. Nenhuma diretriz trata de resíduos sólidos, drenagem urbana ou ocupação de áreas frágeis.", "pas": ["P3", "P5"], "des": ["D12", "D13"]}, {"id": "L8", "area": "amb", "t": "Transição energética e novos vetores (eólica offshore, hidrogênio)", "txt": "O ativo A8 foi ampliado para transição energética, mas o desafio 14 fala apenas de economia verde.", "pas": ["P15"], "des": ["D14", "D8"]}, {"id": "L9", "area": "soc", "t": "Saúde materno-infantil e primeira infância", "txt": "Mortalidade infantil e materna acima do Brasil (P13). As diretrizes de saúde são gerais e não citam o cuidado perinatal.", "pas": ["P13"], "des": ["D16", "D17"]}, {"id": "L10", "area": "soc", "t": "Envelhecimento populacional e cuidado da pessoa idosa", "txt": "A tendência 7 da revisão aponta transição demográfica e envelhecimento. Nenhum desafio trata da população idosa.", "pas": ["P8"], "des": ["D15", "D17"]}, {"id": "L11", "area": "soc", "t": "Violência no campo e conflitos fundiários", "txt": "O estado lidera os conflitos por terra no país (P12). A diretriz 18.1 é genérica e não trata da mediação de conflitos agrários.", "pas": ["P12"], "des": ["D13", "D18"]}, {"id": "L12", "area": "gov", "t": "Capacidade de gestão dos municípios", "txt": "O passivo P9 persiste, mas nenhuma diretriz trata de apoio técnico, capacitação e autonomia fiscal dos municípios.", "pas": ["P9"], "des": ["D19", "D20", "D22"]}, {"id": "L13", "area": "gov", "t": "Dados, inteligência artificial e governo digital", "txt": "As tendências 5 e 13 apontam IA, ciência de dados e planejamento orientado por dados. A diretriz 21.2 cita novas ferramentas sem tratar de dados e IA.", "pas": ["P18", "P16"], "des": ["D21", "D19"]}]}</script>
+<script>
+(function(){
+const DATA = JSON.parse(document.getElementById('dados').textContent);
+const AREA = Object.fromEntries(DATA.areas.map(a=>[a.id,a]));
+const PAS = Object.fromEntries(DATA.passivos.map(p=>[p.id,p]));
+const ATV = Object.fromEntries(DATA.ativos.map(a=>[a.id,a]));
+const DES = Object.fromEntries(DATA.desafios.map(d=>[d.n,d]));
+const SIT = {persiste:'Passivo persiste',avanco:'Em avanço',ampliar:'Ampliar escopo',oportunidade:'Oportunidade'};
+const AV_D = [['manter','Manter'],['ajustar','Ajustar redação'],['fundir','Fundir com outro'],['excluir','Excluir']];
+const AV_R = [['manter','Manter'],['ajustar','Ajustar'],['excluir','Excluir']];
+const LAC_OP = [['novo_desafio','Criar novo desafio'],['nova_diretriz','Nova diretriz em desafio existente'],['contemplado','Já está contemplado']];
+const CAMARAS = DATA.areas.map(a=>a.nome);
+const DRAFT_KEY = 'consulta-ma2050-rascunho-v1';
+/* >>> COLE AQUI a URL do App da Web do Google Apps Script (termina em /exec) <<< */
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxk4ZAiNzkebSQ2NsEcxTVw2m6yxO0af4x0kMH__MeqGe_NyarJDCGl7S2kUkWNeEtfFg/exec';
+const ID_KEY = 'consulta-ma2050-id';
+let RID = null;
+try{ RID = localStorage.getItem(ID_KEY); }catch(e){}
+if(!RID || !/^r-[a-z0-9]{6,30}$/.test(RID)){ RID = 'r-' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); try{ localStorage.setItem(ID_KEY,RID); }catch(e){} }
+
+
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const blank = () => ({ident:{nome:'',inst:'',camara:'',cargo:'',email:''},d:{},lac:{},novos:[],geral:''});
+let R = blank();
+try{ const s = localStorage.getItem(DRAFT_KEY); if(s){ R = Object.assign(blank(), JSON.parse(s)); } }catch(e){}
+
+let db=null, user=null, uid=null, downloads=null, isAdmin=false, sentAt=null, writeBlocked=false;
+try{ sentAt = localStorage.getItem('consulta-ma2050-enviado'); }catch(e){}
+
+/* ---------- caminho no estado ---------- */
+function getP(path){ return path.split('.').reduce((o,k)=>o==null?undefined:o[k], R); }
+function setP(path,val){
+  const ks = path.split('.'); let o=R;
+  for(let i=0;i<ks.length-1;i++){ const k=ks[i]; if(o[k]==null||typeof o[k]!=='object') o[k] = /^\d+$/.test(ks[i+1]) && k==='novos' ? [] : {}; o=o[k]; }
+  o[ks[ks.length-1]] = val;
+}
+let saveT=null;
+function changed(){
+  clearTimeout(saveT); saveT=setTimeout(()=>{ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(R)); }catch(e){} },400);
+  syncSeg(); syncShow(); updateCounts();
+}
+
+/* ---------- componentes ---------- */
+function seg(path, opts, cls=''){
+  return `<div class="seg ${cls}" role="group">${opts.map(([v,l])=>`<button type="button" data-k="${path}" data-v="${v}" aria-pressed="false">${esc(l)}</button>`).join('')}</div>`;
+}
+function pick(path, list, kind){
+  return `<div class="pick">${list.map(x=>`<button type="button" class="${kind}" data-k="${path}" data-toggle="${x.id}" aria-pressed="false" title="${esc(x.nome)}"><span class="code">${x.id}</span>${esc(short(x.nome))}</button>`).join('')}</div>`;
+}
+function short(s){ return s.length>46 ? s.slice(0,44).replace(/[ ,]+\S*$/,'')+'…' : s; }
+function txt(path, ph='', rows=3){ return `<textarea id="t-${path.replace(/\./g,'-')}" data-k="${path}" rows="${rows}" placeholder="${esc(ph)}"></textarea>`; }
+function chipP(id){ const p=PAS[id]; return `<div class="chip p"><span class="code">${id}</span><span>${esc(p.nome)}<small>${esc(p.ind)}</small></span></div>`; }
+function chipA(id){ const a=ATV[id]; return `<div class="chip a"><span class="code">${id}</span><span>${esc(a.nome)}<small>${esc(a.ind)}</small></span></div>`; }
+
+/* ---------- abas ---------- */
+const VIEWS = [
+  {id:'inicio',label:'Apresentação'},
+  ...DATA.areas.map(a=>({id:a.id,label:a.curto,area:a.id})),
+  {id:'lacunas',label:'Lacunas e novos desafios'},
+  {id:'envio',label:'Revisar e enviar'},
+];
+function renderTabs(){
+  const v = VIEWS.slice(); if(isAdmin) v.push({id:'consolidacao',label:'Consolidação'});
+  document.getElementById('tabs').innerHTML = v.map(t=>{
+    const c = t.area ? `style="--tc:var(--${t.area})"` : '';
+    const dot = t.area ? '<span class="dot"></span>' : '';
+    const cnt = t.area ? `<span class="cnt" id="cnt-${t.id}"></span>` : '';
+    return `<button class="tab" ${c} data-view="${t.id}">${dot}${esc(t.label)}${cnt}</button>`;
+  }).join('');
+  markTab();
+}
+function current(){ const h=(location.hash||'').slice(1); return [...VIEWS.map(v=>v.id),'consolidacao'].includes(h)?h:'inicio'; }
+function markTab(){ const c=current(); document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-current', b.dataset.view===c?'page':'false')); }
+
+/* ---------- views ---------- */
+function vInicio(){
+  const nDir = DATA.desafios.reduce((s,d)=>s+d.dir.length,0);
+  return `
+  <section class="panel">
+    <h2>Para que serve esta consulta</h2>
+    <p class="lead">A revisão do Plano Maranhão 2050 consolidou uma nova lista de <b>12 ativos</b> e <b>18 passivos</b> a partir da escuta técnica, da Matriz de Contribuições das Entidades (211 registros) e do Diagnóstico Socioeconômico do IMESC. Agora é preciso verificar se os <b>${DATA.desafios.length} desafios</b> e as <b>${nDir} diretrizes estratégicas</b> do Produto 2.2.2 ainda respondem a essa leitura.</p>
+    <div class="chain" aria-label="Lógica de vinculação">
+      <div class="node n-pas"><b>Passivo</b><span>Fragilidade estrutural identificada na revisão</span></div>
+      <div class="arr" aria-hidden="true">→</div>
+      <div class="node n-des"><b>Desafio prioritário</b><span>Problema a superar ou oportunidade a aproveitar</span></div>
+      <div class="arr" aria-hidden="true">→</div>
+      <div class="node n-prj"><b>Projetos estruturadores</b><span>Ações que implementam as diretrizes</span></div>
+      <div class="node n-atv"><b>Ativo</b><span>Recurso ou competência duradoura do estado</span></div>
+      <div class="arr" aria-hidden="true">→</div>
+      <div class="node n-dir"><b>Diretriz estratégica</b><span>Macroestratégia que mobiliza os ativos</span></div>
+      <div class="arr" aria-hidden="true">↗</div>
+      <div class="node" style="background:transparent"></div>
+    </div>
+    <p class="lead">Cada ficha mostra o desafio atual, os passivos que o justificam, os ativos que sustentam suas diretrizes, as propostas consolidadas na etapa anterior e uma leitura preliminar da equipe técnica com base nos indicadores.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Como responder</h2>
+    <div class="grid2">
+      <div><p class="sec-h">1. Identifique-se</p><p>Preencha nome, instituição e Câmara Técnica abaixo.</p></div>
+      <div><p class="sec-h">2. Avalie as fichas</p><p>Nas abas das áreas, diga se cada desafio e cada diretriz deve ser mantido, ajustado, fundido ou excluído. Responda pelo menos a área da sua Câmara; as demais são opcionais.</p></div>
+      <div><p class="sec-h">3. Aponte lacunas</p><p>Na aba <b>Lacunas e novos desafios</b>, avalie as lacunas preliminares e proponha desafios novos com as diretrizes que os resolvem.</p></div>
+      <div><p class="sec-h">4. Envie</p><p>Revise e envie. As respostas ficam salvas neste navegador enquanto você preenche, e podem ser reenviadas.</p></div>
+    </div>
+    <div>
+      <p class="sec-h">Leitura preliminar da equipe técnica</p>
+      <div class="tags">
+        <span class="sit sit-persiste">${SIT.persiste}</span><span class="sit sit-avanco">${SIT.avanco}</span><span class="sit sit-ampliar">${SIT.ampliar}</span><span class="sit sit-oportunidade">${SIT.oportunidade}</span>
+      </div>
+      <p class="lead" style="margin-top:8px"><b>Passivo persiste</b>: o passivo foi mantido e o indicador segue desfavorável. <b>Em avanço</b>: há melhora mensurável, mas o tema continua relevante. <b>Ampliar escopo</b>: passivos ou ativos novos não cabem na redação atual. <b>Oportunidade</b>: desafio sustentado por ativos, sem passivo associado.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Identificação</h2>
+    <div class="grid2">
+      <label class="f">Nome <span class="req">*</span><input type="text" id="i-nome" data-k="ident.nome" autocomplete="name"></label>
+      <label class="f">Instituição <span class="req">*</span><input type="text" id="i-inst" data-k="ident.inst" autocomplete="organization"></label>
+      <label class="f">Câmara Técnica <span class="req">*</span>
+        <select id="i-camara" data-k="ident.camara"><option value="">Selecione</option>${CAMARAS.map(c=>`<option>${esc(c)}</option>`).join('')}<option>Comissão Maranhão 2050</option><option>Outra</option></select></label>
+      <label class="f">Cargo ou função<input type="text" id="i-cargo" data-k="ident.cargo" autocomplete="organization-title"></label>
+      <label class="f">E-mail <small>(opcional, para retorno da equipe)</small><input type="email" id="i-email" data-k="ident.email" autocomplete="email"></label>
+    </div>
+    <div class="foot-nav"><span></span><a class="btn primary" href="#${guessArea()}">Começar pela área da sua Câmara →</a></div>
+  </section>
+
+  <section class="panel">
+    <h2>Referência: ativos e passivos da revisão 2026</h2>
+    <details class="more"><summary>Ver os 12 ativos e o desafio a que se vinculam</summary>
+      <div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Ativo</th><th>Situação</th><th>Desafios</th></tr></thead><tbody>
+      ${DATA.ativos.map(a=>`<tr><td class="code">${a.id}</td><td>${esc(a.nome)}<br><small style="color:var(--muted)">${esc(a.ind)}</small></td><td>${esc(a.sit)}</td><td class="code">${linksOf(a.id,'atv')}</td></tr>`).join('')}
+      </tbody></table></div></details>
+    <details class="more"><summary>Ver os 18 passivos e o desafio a que se vinculam</summary>
+      <div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Passivo</th><th>Situação</th><th>Desafios</th></tr></thead><tbody>
+      ${DATA.passivos.map(p=>`<tr><td class="code">${p.id}</td><td>${esc(p.nome)}<br><small style="color:var(--muted)">${esc(p.ind)}</small></td><td>${esc(p.sit)}</td><td class="code">${linksOf(p.id,'pas')}</td></tr>`).join('')}
+      </tbody></table></div></details>
+    <p class="status">Fontes: Produto 2.2.2 (Visão de Futuro, Desafios e Diretrizes); Análise Situacional revisada 2026; Painel Ranking Consolidado da Matriz de Contribuições.</p>
+  </section>`;
+}
+function linksOf(id,key){ const l=DATA.desafios.filter(d=>d[key].includes(id)).map(d=>'D'+d.n); return l.length?l.join(', '):'<span class="none">sem vínculo</span>'; }
+function guessArea(){ const c=R.ident.camara; const a=DATA.areas.find(a=>a.nome===c); return a?a.id:'edu'; }
+
+function vArea(aid){
+  const a = AREA[aid];
+  const ds = DATA.desafios.filter(d=>d.area===aid);
+  const i = DATA.areas.findIndex(x=>x.id===aid);
+  const prev = i>0?DATA.areas[i-1]:null, next = i<DATA.areas.length-1?DATA.areas[i+1]:null;
+  return `<div class="view" style="--ac:var(--${aid})">
+  <section class="vision"><div class="eyebrow">Área de resultado ${i+1} · Visão de futuro</div><h2>${esc(a.nome)}</h2><q>${esc(a.visao)}</q></section>
+  ${ds.map(card).join('')}
+  <div class="foot-nav">${prev?`<a class="btn" href="#${prev.id}">← ${esc(prev.curto)}</a>`:'<span></span>'}${next?`<a class="btn primary" href="#${next.id}">${esc(next.curto)} →</a>`:`<a class="btn primary" href="#lacunas">Lacunas e novos desafios →</a>`}</div>
+  </div>`;
+}
+function card(d){
+  const k = `d.${d.n}`;
+  const extra = d.nprop - d.prop.length;
+  return `<article class="card" id="desafio-${d.n}">
+   <header class="card-h"><div class="dnum">${d.n}</div><div>
+     <div class="meta"><span class="eyebrow dlabel">Desafio estratégico ${d.n} do Plano · em análise</span><span class="done-mark" id="ok-${d.n}" hidden>✓ avaliado</span></div>
+     <h3>${esc(d.t)}</h3></div></header>
+   <div class="card-b">
+     <div class="reading"><b>Leitura preliminar da equipe técnica <span class="sit sit-${d.sit}">${SIT[d.sit]}</span></b>${esc(d.leitura)}</div>
+     <div class="links">
+       <div><h4>Passivos que justificam o desafio</h4><div class="chips">${d.pas.length?d.pas.map(chipP).join(''):'<p class="none">Nenhum passivo vinculado: desafio de oportunidade.</p>'}</div></div>
+       <div><h4>Ativos que sustentam as diretrizes</h4><div class="chips">${d.atv.length?d.atv.map(chipA).join(''):'<p class="none">Nenhum ativo vinculado diretamente. Vale apontar qual ativo pode apoiar este desafio.</p>'}</div></div>
+     </div>
+
+     <div class="q"><div class="q-l">1. Este desafio deve permanecer no Plano?</div>${seg(k+'.av',AV_D)}
+       <div class="status">Justifique sua resposta. Se escolheu ajustar, escreva também como o desafio deveria ficar; se escolheu fundir, indique com qual desafio.</div>${txt(k+'.red','Justificativa e, se for o caso, a nova redação proposta para o desafio.')}</div>
+
+     <div class="q"><div class="q-l">2. Diretrizes estratégicas atuais</div>
+       ${d.dir.map((t,i)=>`<div class="dir"><div class="dir-t"><span class="code">${d.n}.${i+1}</span><p>${esc(t)}</p></div>${seg(`${k}.dir.${i}.a`,AV_R)}
+         <div data-show="${k}.dir.${i}.a" data-when="ajustar,excluir">${txt(`${k}.dir.${i}.txt`,'Nova redação ou justificativa',2)}</div></div>`).join('')}
+     </div>
+
+     <div class="q"><div class="q-l">3. Propostas consolidadas na etapa anterior que tocam este desafio</div>
+       <div class="props">${d.prop.length?`<ul>${d.prop.map(p=>`<li><span>${esc(p.t)}</span><span class="org">${esc(p.o)}</span></li>`).join('')}</ul>`:'<p class="none">Nenhuma proposta vinculada na Matriz de Contribuições.</p>'}
+       ${extra>0?`<p class="status">e mais ${extra} proposta${extra>1?'s':''} no painel Ranking Consolidado.</p>`:''}</div>
+     </div>
+
+     <div class="q"><div class="q-l">4. Falta alguma diretriz para este desafio?</div>
+       ${txt(k+'.nd','Escreva a diretriz que falta. Ela pode partir de uma das propostas acima.')}
+       <div class="status">Quais ativos essa nova diretriz mobiliza?</div>${pick(k+'.nda',DATA.ativos,'pa')}
+     </div>
+
+     <div class="q"><div class="q-l">5. Relevância do desafio para o horizonte 2050</div>${seg(k+'.rel',[['1','1'],['2','2'],['3','3'],['4','4'],['5','5']],'scale')}<div class="status">1 = baixa · 5 = muito alta</div></div>
+   </div></article>`;
+}
+
+function vLacunas(){
+  return `<section class="panel">
+    <h2>Lacunas preliminares</h2>
+    <p class="lead">A equipe técnica cruzou a nova lista de ativos e passivos com os desafios e diretrizes atuais. Os temas abaixo aparecem na revisão, mas não têm desafio ou diretriz que os trate de forma explícita. Diga como cada um deve entrar no Plano.</p>
+  </section>
+  ${DATA.areas.map(a=>{
+    const ls = DATA.lacunas.filter(l=>l.area===a.id); if(!ls.length) return '';
+    return `<div class="view" style="--ac:var(--${a.id})"><h2 style="font-size:1.25rem;color:var(--${a.id})">${esc(a.nome)}</h2>
+    ${ls.map(l=>`<article class="lac" id="lac-${l.id}"><h3>${esc(l.t)}</h3><p>${esc(l.txt)}</p>
+      <div class="ctx">${l.pas.map(p=>`<span class="mini p" title="${esc(PAS[p].nome)}">${p}</span>`).join('')}${l.des.map(x=>`<span class="mini d" title="${esc(DES[+x.slice(1)].t)}">${x}</span>`).join('')}</div>
+      ${seg(`lac.${l.id}.op`,LAC_OP)}
+      <div data-show="lac.${l.id}.op" data-when="novo_desafio,nova_diretriz">${txt(`lac.${l.id}.txt`,'Como você redigiria o desafio ou a diretriz? Em qual desafio atual ela entraria?')}</div>
+    </article>`).join('')}</div>`;
+  }).join('')}
+  <section class="panel">
+    <h2>Propor novos desafios</h2>
+    <p class="lead">Registre desafios que não estão contemplados. Para cada um, indique o passivo que o origina e a diretriz, apoiada em ativos, que pode resolvê-lo.</p>
+    <div id="novos" style="display:grid;gap:14px"></div>
+    <div class="actions"><button type="button" class="btn" id="add-novo">+ Adicionar desafio</button></div>
+  </section>
+  <div class="foot-nav"><a class="btn" href="#gov">← Governança</a><a class="btn primary" href="#envio">Revisar e enviar →</a></div>`;
+}
+function renderNovos(){
+  const el = document.getElementById('novos'); if(!el) return;
+  el.innerHTML = R.novos.length ? R.novos.map((n,i)=>`<div class="novo">
+    <div class="novo-h"><p class="sec-h" style="margin:0">Novo desafio ${i+1}</p><button type="button" class="btn ghost" data-rm="${i}">Remover</button></div>
+    <div class="grid2">
+      <label class="f">Área de resultado<select id="n-${i}-area" data-k="novos.${i}.area"><option value="">Selecione</option>${DATA.areas.map(a=>`<option value="${a.id}">${esc(a.nome)}</option>`).join('')}</select></label>
+      <label class="f">Título do desafio<input type="text" id="n-${i}-t" data-k="novos.${i}.t" placeholder="Verbo no infinitivo + resultado esperado"></label>
+    </div>
+    <div><p class="sec-h">Passivos que originam o desafio</p>${pick(`novos.${i}.pas`,DATA.passivos,'pp')}</div>
+    <label class="f">Evidência ou indicador que sustenta o desafio${txt(`novos.${i}.ev`,'Dado, fonte e ano',2)}</label>
+    <label class="f">Diretriz(es) estratégica(s) que podem solucioná-lo${txt(`novos.${i}.dir`,'Uma diretriz por linha')}</label>
+    <div><p class="sec-h">Ativos que essas diretrizes mobilizam</p>${pick(`novos.${i}.atv`,DATA.ativos,'pa')}</div>
+    <label class="f">Instituições que deveriam liderar ou apoiar<input type="text" id="n-${i}-inst" data-k="novos.${i}.inst"></label>
+  </div>`).join('') : '<p class="none">Nenhum desafio novo adicionado.</p>';
+  hydrate(el);
+}
+
+function vEnvio(){
+  return `<section class="panel">
+    <h2>Resumo das suas respostas</h2>
+    <div class="tbl-wrap"><table><thead><tr><th>Área de resultado</th><th class="num">Desafios avaliados</th><th class="num">Diretrizes avaliadas</th><th class="num">Diretrizes novas</th></tr></thead><tbody id="resumo"></tbody></table></div>
+    <p class="status" id="resumo-lac"></p>
+  </section>
+  <section class="panel">
+    <h2>Considerações gerais</h2>
+    <label class="f">Algo mais sobre a revisão dos desafios e diretrizes?${txt('geral','Comentários gerais, prioridades, alertas',4)}</label>
+  </section>
+  <section class="panel">
+    <h2>Enviar</h2>
+    <p class="lead" id="envio-lead"></p>
+    <input type="text" id="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+    <div class="actions">
+      <button type="button" class="btn primary" id="btn-enviar">Enviar respostas</button>
+      <button type="button" class="btn" id="btn-copiar">Copiar respostas em texto</button>
+      <button type="button" class="btn" id="btn-baixar" hidden>Baixar arquivo das respostas</button>
+    </div>
+    <p class="status" id="envio-status" role="status"></p>
+    <textarea id="copia-fallback" hidden readonly rows="8"></textarea>
+  </section>`;
+}
+
+/* ---------- consolidação (editores) ---------- */
+let ALL=[], unsub=null;
+function vConsol(){
+  return `<section class="panel"><h2>Consolidação das respostas</h2>
+   <p class="lead">Visível apenas para a proprietária desta página. Atualiza em tempo real conforme as Câmaras enviam.</p>
+   <div class="kpis" id="c-kpis"><div class="kpi"><b>…</b><span>carregando respostas</span></div></div>
+   <div class="actions"><button type="button" class="btn" id="btn-csv">Baixar planilha (CSV)</button></div>
+   <p class="status" id="c-status"></p></section>
+   <section class="panel"><h2>Desafios atuais</h2>
+   <div class="legend"><span><i class="b-manter"></i>Manter</span><span><i class="b-ajustar"></i>Ajustar</span><span><i class="b-fundir"></i>Fundir</span><span><i class="b-excluir"></i>Excluir</span></div>
+   <div class="tbl-wrap"><table><thead><tr><th>Desafio</th><th>Avaliações</th><th class="num">n</th><th class="num">Relevância média</th><th class="num">Sugestões</th></tr></thead><tbody id="c-des"></tbody></table></div></section>
+   <section class="panel"><h2>Lacunas preliminares</h2>
+   <div class="tbl-wrap"><table><thead><tr><th>Lacuna</th><th class="num">Novo desafio</th><th class="num">Nova diretriz</th><th class="num">Contemplado</th></tr></thead><tbody id="c-lac"></tbody></table></div></section>
+   <section class="panel"><h2>Novos desafios e diretrizes propostos</h2><div id="c-novos" style="display:grid;gap:10px"></div></section>`;
+}
+function startConsol(){
+  if(!db || unsub) { drawConsol(); return; }
+  const t = setTimeout(()=>{ const s=document.getElementById('c-status'); if(s) s.textContent='As respostas ainda não puderam ser carregadas.'; },10000);
+  unsub = db.collection('respostas').onSnapshot(snap=>{
+    if(!snap.metadata.fromCache) clearTimeout(t);
+    ALL = snap.docs.filter(x=>x.exists).map(x=>x.data()); drawConsol();
+  }, err=>{ clearTimeout(t); const s=document.getElementById('c-status'); if(s){ s.className='status err'; s.textContent='Não foi possível ler as respostas ('+err.code+').'; } });
+}
+function drawConsol(){
+  const k = document.getElementById('c-kpis'); if(!k) return;
+  const cams = new Set(ALL.map(r=>r.ident?.camara).filter(Boolean));
+  const insts = new Set(ALL.map(r=>(r.ident?.inst||'').trim().toLowerCase()).filter(Boolean));
+  const nNovos = ALL.reduce((s,r)=>s+(r.novos||[]).filter(n=>n.t).length,0);
+  k.innerHTML = [[ALL.length,'respostas'],[insts.size,'instituições'],[cams.size,'Câmaras representadas'],[nNovos,'desafios novos propostos']].map(([n,l])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join('');
+  document.getElementById('c-des').innerHTML = DATA.desafios.map(d=>{
+    const c={manter:0,ajustar:0,fundir:0,excluir:0}; let rs=0,rn=0,sug=0;
+    ALL.forEach(r=>{ const x=r.d?.[d.n]; if(!x) return; if(c[x.av]!=null) c[x.av]++; if(x.rel){rs+=+x.rel;rn++;} if(x.red) sug++; if(x.nd) sug++; Object.values(x.dir||{}).forEach(z=>{ if(z.txt) sug++; }); });
+    const n = c.manter+c.ajustar+c.fundir+c.excluir;
+    const bar = n?Object.entries(c).map(([kk,v])=>v?`<span class="b-${kk}" style="width:${v/n*100}%" title="${kk}: ${v}"></span>`:'').join(''):'';
+    return `<tr><td><span class="code">D${d.n}</span> ${esc(short(d.t))}</td><td><div class="bar">${bar}</div></td><td class="num">${n}</td><td class="num">${rn?(rs/rn).toFixed(1):'–'}</td><td class="num">${sug}</td></tr>`;
+  }).join('');
+  document.getElementById('c-lac').innerHTML = DATA.lacunas.map(l=>{
+    const c={novo_desafio:0,nova_diretriz:0,contemplado:0}; ALL.forEach(r=>{ const o=r.lac?.[l.id]?.op; if(c[o]!=null) c[o]++; });
+    return `<tr><td>${esc(l.t)}</td><td class="num">${c.novo_desafio}</td><td class="num">${c.nova_diretriz}</td><td class="num">${c.contemplado}</td></tr>`;
+  }).join('');
+  const items=[];
+  ALL.forEach(r=>{
+    const who = `${r.ident?.nome||'Sem nome'} · ${r.ident?.inst||''}`;
+    (r.novos||[]).filter(n=>n.t).forEach(n=>items.push(`<div class="quote"><b>Novo desafio:</b> ${esc(n.t)}${n.dir?`<br><b>Diretrizes:</b> ${esc(n.dir)}`:''}${(n.pas||[]).length?`<br><b>Passivos:</b> ${n.pas.join(', ')}`:''}${(n.atv||[]).length?` · <b>Ativos:</b> ${n.atv.join(', ')}`:''}<cite>${esc(who)}</cite></div>`));
+    Object.entries(r.d||{}).forEach(([dn,x])=>{ if(x.nd) items.push(`<div class="quote"><b>Nova diretriz para D${dn}:</b> ${esc(x.nd)}<cite>${esc(who)}</cite></div>`); });
+  });
+  document.getElementById('c-novos').innerHTML = items.length?items.join(''):'<p class="none">Nenhuma proposta textual ainda.</p>';
+}
+function csv(){
+  const rows=[['nome','instituicao','camara','tipo','item','avaliacao','texto','relevancia','ativos']];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  ALL.forEach(r=>{
+    const base=[r.ident?.nome,r.ident?.inst,r.ident?.camara];
+    Object.entries(r.d||{}).forEach(([dn,x])=>{
+      if(x.av||x.red||x.rel) rows.push([...base,'desafio','D'+dn,x.av,x.red,x.rel,'']);
+      Object.entries(x.dir||{}).forEach(([i,z])=>{ if(z.a||z.txt) rows.push([...base,'diretriz',`D${dn}.${+i+1}`,z.a,z.txt,'','']); });
+      if(x.nd) rows.push([...base,'nova_diretriz','D'+dn,'',x.nd,'',(x.nda||[]).join(' ')]);
+    });
+    Object.entries(r.lac||{}).forEach(([id,l])=>{ if(l.op||l.txt) rows.push([...base,'lacuna',id,l.op,l.txt,'','']); });
+    (r.novos||[]).forEach(n=>{ if(n.t) rows.push([...base,'novo_desafio',n.area,(n.pas||[]).join(' '),`${n.t} | Diretrizes: ${n.dir||''} | Evidência: ${n.ev||''} | Instituições: ${n.inst||''}`,'',(n.atv||[]).join(' ')]); });
+    if(r.geral) rows.push([...base,'geral','','',r.geral,'','']);
+  });
+  return '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
+}
+
+/* ---------- itens para a planilha ---------- */
+function itensDe(r){
+  const out=[]; const lab=(arr,v)=>(arr.find(x=>x[0]===v)||[,v||''])[1];
+  Object.entries(r.d||{}).forEach(([dn,x])=>{
+    const d=DES[+dn]; if(!d) return;
+    if(x.av||x.red||x.rel) out.push(['desafio','D'+dn,d.t,lab(AV_D,x.av),x.red||'',x.rel||'','']);
+    Object.entries(x.dir||{}).forEach(([i,z])=>{ if(z.a||z.txt) out.push(['diretriz',`D${dn}.${+i+1}`,d.dir[+i]||'',lab(AV_R,z.a),z.txt||'','','']); });
+    if(x.nd||(x.nda||[]).length) out.push(['nova_diretriz','D'+dn,d.t,'',x.nd||'','',(x.nda||[]).join(' ')]);
+  });
+  Object.entries(r.lac||{}).forEach(([id,l])=>{ const g=DATA.lacunas.find(z=>z.id===id); if(g&&(l.op||l.txt)) out.push(['lacuna',id,g.t,lab(LAC_OP,l.op),l.txt||'','','']); });
+  (r.novos||[]).forEach((n,i)=>{ if(n.t) out.push(['novo_desafio','N'+(i+1)+(n.area?'-'+n.area:''),n.t,(n.pas||[]).join(' '),`Diretrizes: ${n.dir||''} | Evidência: ${n.ev||''} | Instituições: ${n.inst||''}`,'',(n.atv||[]).join(' ')]); });
+  if(r.geral) out.push(['geral','','Considerações gerais','',r.geral,'','']);
+  return out;
+}
+/* ---------- texto das respostas ---------- */
+function asText(){
+  const L=[]; const lab=(arr,v)=>(arr.find(x=>x[0]===v)||[,''])[1];
+  L.push('CONSULTA ÀS CÂMARAS TÉCNICAS · DESAFIOS E DIRETRIZES · PLANO MARANHÃO 2050');
+  L.push(`Nome: ${R.ident.nome}`,`Instituição: ${R.ident.inst}`,`Câmara Técnica: ${R.ident.camara}`,`Cargo: ${R.ident.cargo}`,`E-mail: ${R.ident.email}`,'');
+  DATA.areas.forEach(a=>{
+    const ds = DATA.desafios.filter(d=>d.area===a.id && R.d[d.n]); if(!ds.length) return;
+    L.push('== '+a.nome.toUpperCase());
+    ds.forEach(d=>{ const x=R.d[d.n];
+      L.push(`D${d.n}. ${d.t}`);
+      if(x.av) L.push(`  Desafio: ${lab(AV_D,x.av)}${x.red?' — '+x.red:''}`);
+      if(x.rel) L.push(`  Relevância 2050: ${x.rel}/5`);
+      Object.entries(x.dir||{}).forEach(([i,z])=>{ if(z.a) L.push(`  Diretriz ${d.n}.${+i+1}: ${lab(AV_R,z.a)}${z.txt?' — '+z.txt:''}`); });
+      if(x.nd) L.push(`  Nova diretriz: ${x.nd}${(x.nda||[]).length?' (ativos: '+x.nda.join(', ')+')':''}`);
+    }); L.push('');
+  });
+  const lk = Object.entries(R.lac).filter(([,l])=>l.op);
+  if(lk.length){ L.push('== LACUNAS PRELIMINARES'); lk.forEach(([id,l])=>{ const g=DATA.lacunas.find(x=>x.id===id); L.push(`${g.t}: ${lab(LAC_OP,l.op)}${l.txt?' — '+l.txt:''}`); }); L.push(''); }
+  const nv = R.novos.filter(n=>n.t);
+  if(nv.length){ L.push('== NOVOS DESAFIOS'); nv.forEach((n,i)=>{ L.push(`${i+1}. ${n.t} [${AREA[n.area]?.curto||''}]`); if((n.pas||[]).length) L.push('   Passivos: '+n.pas.join(', ')); if(n.ev) L.push('   Evidência: '+n.ev); if(n.dir) L.push('   Diretrizes: '+n.dir); if((n.atv||[]).length) L.push('   Ativos: '+n.atv.join(', ')); if(n.inst) L.push('   Instituições: '+n.inst); }); L.push(''); }
+  if(R.geral){ L.push('== CONSIDERAÇÕES GERAIS', R.geral); }
+  return L.join('\n');
+}
+
+/* ---------- contagens ---------- */
+function updateCounts(){
+  DATA.areas.forEach(a=>{
+    const ds=DATA.desafios.filter(d=>d.area===a.id); const done=ds.filter(d=>R.d[d.n]?.av).length;
+    const el=document.getElementById('cnt-'+a.id); if(el) el.textContent=`${done}/${ds.length}`;
+  });
+  DATA.desafios.forEach(d=>{ const el=document.getElementById('ok-'+d.n); if(el) el.hidden=!R.d[d.n]?.av; });
+  const tb=document.getElementById('resumo');
+  if(tb){
+    tb.innerHTML = DATA.areas.map(a=>{
+      const ds=DATA.desafios.filter(d=>d.area===a.id);
+      const nd=ds.filter(d=>R.d[d.n]?.av).length;
+      const tot=ds.reduce((s,d)=>s+d.dir.length,0);
+      const nr=ds.reduce((s,d)=>s+Object.values(R.d[d.n]?.dir||{}).filter(z=>z.a).length,0);
+      const nn=ds.filter(d=>R.d[d.n]?.nd).length;
+      return `<tr><td>${esc(a.nome)}</td><td class="num">${nd} de ${ds.length}</td><td class="num">${nr} de ${tot}</td><td class="num">${nn}</td></tr>`;
+    }).join('');
+    const nl=Object.values(R.lac).filter(l=>l.op).length, nv=R.novos.filter(n=>n.t).length;
+    document.getElementById('resumo-lac').textContent = `Lacunas avaliadas: ${nl} de ${DATA.lacunas.length}. Desafios novos propostos: ${nv}.`;
+  }
+}
+
+/* ---------- sincronização de controles ---------- */
+function syncSeg(root=document){
+  root.querySelectorAll('button[data-k][data-v]').forEach(b=>b.setAttribute('aria-pressed', String(getP(b.dataset.k))===b.dataset.v?'true':'false'));
+  root.querySelectorAll('button[data-k][data-toggle]').forEach(b=>{ const a=getP(b.dataset.k)||[]; b.setAttribute('aria-pressed', a.includes(b.dataset.toggle)?'true':'false'); });
+}
+function syncShow(root=document){
+  root.querySelectorAll('[data-show]').forEach(el=>{ el.hidden = !el.dataset.when.split(',').includes(String(getP(el.dataset.show)??'')); });
+}
+function hydrate(root){
+  root.querySelectorAll('input[data-k],textarea[data-k],select[data-k]').forEach(el=>{ const v=getP(el.dataset.k); el.value = v==null?'':v; });
+  syncSeg(root); syncShow(root);
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click', e=>{
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.dataset.view){ location.hash = t.dataset.view; return; }
+  if(t.dataset.k && t.dataset.v!=null){ const cur=getP(t.dataset.k); setP(t.dataset.k, cur===t.dataset.v?'':t.dataset.v); changed(); return; }
+  if(t.dataset.k && t.dataset.toggle){ const a=(getP(t.dataset.k)||[]).slice(); const i=a.indexOf(t.dataset.toggle); i<0?a.push(t.dataset.toggle):a.splice(i,1); setP(t.dataset.k,a); changed(); return; }
+  if(t.id==='add-novo'){ R.novos.push({area:'',t:'',pas:[],ev:'',dir:'',atv:[],inst:''}); renderNovos(); changed(); return; }
+  if(t.dataset.rm!=null){ R.novos.splice(+t.dataset.rm,1); renderNovos(); changed(); return; }
+  if(t.id==='btn-enviar') enviar();
+  if(t.id==='btn-copiar') copiar();
+  if(t.id==='btn-baixar') baixar();
+  if(t.id==='btn-csv') baixarCsv();
+});
+document.addEventListener('input', e=>{ const el=e.target; if(el.dataset && el.dataset.k && !el.dataset.v){ setP(el.dataset.k, el.value); changed(); } });
+document.addEventListener('change', e=>{ const el=e.target; if(el.tagName==='SELECT' && el.dataset.k){ setP(el.dataset.k, el.value); changed(); } });
+
+/* ---------- envio ---------- */
+function status(msg,cls=''){ const s=document.getElementById('envio-status'); if(s){ s.className='status '+cls; s.textContent=msg; } }
+function faltando(){ const f=[]; if(!R.ident.nome.trim()) f.push('nome'); if(!R.ident.inst.trim()) f.push('instituição'); if(!R.ident.camara) f.push('Câmara Técnica'); return f; }
+async function enviar(){
+  const f=faltando(); if(f.length){ status('Preencha na Apresentação: '+f.join(', ')+'.','err'); return; }
+  if(!/^https:\/\/script\.google\.com\//.test(ENDPOINT)){ status('O envio ainda não foi configurado. Use “Copiar respostas em texto” e envie à equipe da SEPLAN.','err'); return; }
+  const hp=document.getElementById('hp');
+  const b=document.getElementById('btn-enviar'); b.disabled=true; status('Enviando…');
+  const ds=Object.values(R.d||{});
+  const payload={id:RID, hp:hp?hp.value:'', enviadoEm:new Date().toISOString(), resposta:R, itens:itensDe(R),
+    resumo:{desafios:ds.filter(x=>x.av).length, diretrizes:ds.reduce((s,x)=>s+Object.values(x.dir||{}).filter(z=>z.a).length,0), novos:(R.novos||[]).filter(n=>n.t).length}};
+  const tentar=async()=>{ const res=await fetch(ENDPOINT,{method:'POST',body:JSON.stringify(payload)}); const j=await res.json(); if(!j.ok) throw new Error(j.erro||'recusado'); };
+  try{ await tentar(); }
+  catch(e1){
+    try{ await new Promise(r=>setTimeout(r,1200)); await tentar(); }
+    catch(e2){ b.disabled=false; status('Não foi possível enviar agora. Verifique a internet e tente de novo, ou use “Copiar respostas em texto” e envie por e-mail.','err'); return; }
+  }
+  b.disabled=false; sentAt=payload.enviadoEm; try{ localStorage.setItem('consulta-ma2050-enviado',sentAt); }catch(e){}
+  status('Respostas enviadas em '+new Date(sentAt).toLocaleString('pt-BR')+'. Você pode editar e reenviar neste mesmo navegador: o novo envio substitui o anterior.','ok');
+  envioLead();
+}
+async function copiar(){
+  const t=asText();
+  try{ await navigator.clipboard.writeText(t); status('Respostas copiadas. Cole no e-mail para a equipe da SEPLAN.','ok'); }
+  catch(e){ const ta=document.getElementById('copia-fallback'); ta.hidden=false; ta.value=t; ta.focus(); ta.select(); status('Selecionamos o texto abaixo. Use Ctrl+C (ou Copiar) para copiar.'); }
+}
+async function baixar(){
+  const nome=(R.ident.inst||'respostas').replace(/[^\w\-]+/g,'_').slice(0,40);
+  const url=URL.createObjectURL(new Blob([asText()],{type:'text/plain;charset=utf-8'}));
+  const a=document.createElement('a'); a.href=url; a.download=`consulta_ma2050_${nome}.txt`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000); status('Arquivo baixado.','ok');
+}
+async function baixarCsv(){
+  const s=document.getElementById('c-status');
+  if(!downloads){ s.textContent='Download indisponível nesta visualização.'; return; }
+  try{ await downloads.save({filename:'consolidacao_consulta_ma2050.csv',data:csv()}); s.className='status ok'; s.textContent='Planilha salva.'; }
+  catch(e){ if(e.code!=='declined'){ s.className='status err'; s.textContent='Não foi possível salvar a planilha.'; } }
+}
+function envioLead(){
+  const el=document.getElementById('envio-lead'); if(!el) return;
+  el.textContent = sentAt ? `Você enviou em ${new Date(sentAt).toLocaleString('pt-BR')}. Um novo envio feito neste navegador substitui o anterior.` : 'Ao enviar, suas respostas vão direto para a equipe da SEPLAN. Você pode reenviar depois, neste mesmo navegador, para corrigir.';
+  const bb=document.getElementById('btn-baixar'); if(bb) bb.hidden=false;
+}
+
+/* ---------- roteamento ---------- */
+function show(){
+  const v=current(), app=document.getElementById('app');
+  if(v==='consolidacao' && !isAdmin){ location.hash='inicio'; return; }
+  app.innerHTML = v==='inicio'?vInicio(): v==='lacunas'?vLacunas(): v==='envio'?vEnvio(): v==='consolidacao'?vConsol(): vArea(v);
+  if(v==='lacunas') renderNovos();
+  hydrate(app); updateCounts(); markTab();
+  if(v==='envio') envioLead();
+  if(v==='consolidacao') startConsol();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', show);
+renderTabs(); show();
+
+})();
+</script>
+
+</body>
+</html>
