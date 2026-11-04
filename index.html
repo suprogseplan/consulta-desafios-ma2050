@@ -88,7 +88,8 @@ main .wrap>*,.view>*,.card-b>*,.q>*,.lac>*{min-width:0}
 .sit-persiste{color:var(--red)} .sit-avanco{color:var(--green)} .sit-ampliar{color:var(--gold)} .sit-oportunidade{color:var(--teal)}
 
 /* formulário */
-label.f{display:grid;gap:4px;font-weight:600;font-size:.92rem;min-width:0}
+label.f{display:grid;gap:4px;font-weight:600;font-size:.92rem;min-width:0;align-content:start}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
 label.f small{font-weight:400;color:var(--muted)}
 input[type=text],input[type=email],select,textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%}
 textarea{min-height:76px;resize:vertical}
@@ -188,6 +189,24 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
 .kpi span{font-size:.85rem;color:var(--muted)}
 .foot-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 @media (prefers-reduced-motion:no-preference){.seg button,.tab,.btn{transition:background-color .12s,color .12s}}
+.det{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.det summary{cursor:pointer;padding:10px 14px;font-weight:600;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.det[open] summary{border-bottom:1px solid var(--line)}
+.det .cnt-s{font-weight:400;font-size:.82rem;color:var(--muted)}
+.det-b{padding:12px 14px;display:grid;gap:14px}
+.det-b .quote{margin-top:6px}
+.det-b .quote p{margin-top:4px}
+.det-dir{margin-top:8px}
+.det-dt{font-size:.88rem;color:var(--muted)}
+.det-area{font-size:1.15rem;margin-top:6px}
+.pill{display:inline-block;font-size:.74rem;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink)}
+.p-manter{background:var(--ativo-bg);color:var(--ativo-ink)} .p-ajustar{background:#F6E7C8;color:#7A4E05} .p-fundir{background:#D6EEF2;color:#0C5B68} .p-excluir{background:var(--passivo-bg);color:var(--passivo-ink)}
+.p-novo_desafio,.p-nova_diretriz{background:#F6E7C8;color:#7A4E05} .p-contemplado{background:var(--ativo-bg);color:var(--ativo-ink)}
+.rel{font-size:.8rem;color:var(--muted)}
+a.dlink{color:inherit;text-decoration:none} a.dlink:hover{text-decoration:underline}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .p-ajustar,:root:not([data-theme="light"]) .p-novo_desafio,:root:not([data-theme="light"]) .p-nova_diretriz{background:#3D2E10;color:#F1C978}:root:not([data-theme="light"]) .p-fundir{background:#123A41;color:#8FDCE8}}
+:root[data-theme="dark"] .p-ajustar,:root[data-theme="dark"] .p-novo_desafio,:root[data-theme="dark"] .p-nova_diretriz{background:#3D2E10;color:#F1C978}
+:root[data-theme="dark"] .p-fundir{background:#123A41;color:#8FDCE8}
 </style>
 </head>
 <body>
@@ -215,7 +234,7 @@ const SIT = {persiste:'Passivo persiste',avanco:'Em avanço',ampliar:'Ampliar es
 const AV_D = [['manter','Manter'],['ajustar','Ajustar redação'],['fundir','Fundir com outro'],['excluir','Excluir']];
 const AV_R = [['manter','Manter'],['ajustar','Ajustar'],['excluir','Excluir']];
 const LAC_OP = [['novo_desafio','Criar novo desafio'],['nova_diretriz','Nova diretriz em desafio existente'],['contemplado','Já está contemplado']];
-const CAMARAS = DATA.areas.map(a=>a.nome);
+const INSTANCIAS = ['Câmara de Desenvolvimento Social','Câmara de Desenvolvimento Econômico','Câmara de Desenvolvimento Ambiental','Câmara de Desenvolvimento Institucional','Comissão Maranhão 2050','Outros'];
 const DRAFT_KEY = 'consulta-ma2050-rascunho-v1';
 /* >>> COLE AQUI a URL do App da Web do Google Apps Script (termina em /exec) <<< */
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxk4ZAiNzkebSQ2NsEcxTVw2m6yxO0af4x0kMH__MeqGe_NyarJDCGl7S2kUkWNeEtfFg/exec';
@@ -226,7 +245,7 @@ if(!RID || !/^r-[a-z0-9]{6,30}$/.test(RID)){ RID = 'r-' + Date.now().toString(36
 
 
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const blank = () => ({ident:{nome:'',inst:'',camara:'',cargo:'',email:''},d:{},lac:{},novos:[],geral:''});
+const blank = () => ({ident:{nome:'',inst:'',camara:'',eixo:'',cargo:'',email:''},d:{},lac:{},novos:[],geral:''});
 let R = blank();
 try{ const s = localStorage.getItem(DRAFT_KEY); if(s){ R = Object.assign(blank(), JSON.parse(s)); } }catch(e){}
 
@@ -243,7 +262,7 @@ function setP(path,val){
 let saveT=null;
 function changed(){
   clearTimeout(saveT); saveT=setTimeout(()=>{ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(R)); }catch(e){} },400);
-  syncSeg(); syncShow(); updateCounts();
+  syncSeg(); syncShow(); updateCounts(); syncComecar();
 }
 
 /* ---------- componentes ---------- */
@@ -297,14 +316,14 @@ function vInicio(){
       <div class="arr" aria-hidden="true">↗</div>
       <div class="node" style="background:transparent"></div>
     </div>
-    <p class="lead">Cada ficha mostra o desafio atual, os passivos que o justificam, os ativos que sustentam suas diretrizes, as propostas consolidadas na etapa anterior e uma leitura preliminar da equipe técnica com base nos indicadores.</p>
+    <p class="lead">Cada ficha mostra o desafio atual, os passivos que o justificam, os ativos que sustentam suas diretrizes e uma leitura preliminar da equipe técnica com base nos indicadores.</p>
   </section>
 
   <section class="panel">
     <h2>Como responder</h2>
     <div class="grid2">
-      <div><p class="sec-h">1. Identifique-se</p><p>Preencha nome, instituição e Câmara Técnica abaixo.</p></div>
-      <div><p class="sec-h">2. Avalie as fichas</p><p>Nas abas das áreas, diga se cada desafio e cada diretriz deve ser mantido, ajustado, fundido ou excluído. Responda pelo menos a área da sua Câmara; as demais são opcionais.</p></div>
+      <div><p class="sec-h">1. Identifique-se</p><p>Preencha nome, instituição, instância da governança e eixo de desenvolvimento abaixo.</p></div>
+      <div><p class="sec-h">2. Avalie as fichas</p><p>Nas abas das áreas, diga se cada desafio e cada diretriz deve ser mantido, ajustado, fundido ou excluído. Responda pelo menos o eixo selecionado na identificação; os demais são opcionais.</p></div>
       <div><p class="sec-h">3. Aponte lacunas</p><p>Na aba <b>Lacunas e novos desafios</b>, avalie as lacunas preliminares e proponha desafios novos com as diretrizes que os resolvem.</p></div>
       <div><p class="sec-h">4. Envie</p><p>Revise e envie. As respostas ficam salvas neste navegador enquanto você preenche, e podem ser reenviadas.</p></div>
     </div>
@@ -320,14 +339,16 @@ function vInicio(){
   <section class="panel">
     <h2>Identificação</h2>
     <div class="grid2">
-      <label class="f">Nome <span class="req">*</span><input type="text" id="i-nome" data-k="ident.nome" autocomplete="name"></label>
-      <label class="f">Instituição <span class="req">*</span><input type="text" id="i-inst" data-k="ident.inst" autocomplete="organization"></label>
-      <label class="f">Câmara Técnica <span class="req">*</span>
-        <select id="i-camara" data-k="ident.camara"><option value="">Selecione</option>${CAMARAS.map(c=>`<option>${esc(c)}</option>`).join('')}<option>Comissão Maranhão 2050</option><option>Outra</option></select></label>
-      <label class="f">Cargo ou função<input type="text" id="i-cargo" data-k="ident.cargo" autocomplete="organization-title"></label>
-      <label class="f">E-mail <small>(opcional, para retorno da equipe)</small><input type="email" id="i-email" data-k="ident.email" autocomplete="email"></label>
+      <label class="f"><span>Nome <span class="req">*</span></span><input type="text" id="i-nome" data-k="ident.nome" autocomplete="name"></label>
+      <label class="f"><span>Instituição <span class="req">*</span></span><input type="text" id="i-inst" data-k="ident.inst" autocomplete="organization"></label>
+      <label class="f"><span>Cargo ou função</span><input type="text" id="i-cargo" data-k="ident.cargo" autocomplete="organization-title"></label>
+      <label class="f"><span>Instância da governança <span class="req">*</span></span>
+        <select id="i-camara" data-k="ident.camara"><option value="">Selecione</option>${INSTANCIAS.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
+      <label class="f"><span>Eixo de desenvolvimento <span class="req">*</span></span>
+        <select id="i-eixo" data-k="ident.eixo"><option value="">Selecione</option>${DATA.areas.map(a=>`<option value="${a.id}">${esc(a.nome)}</option>`).join('')}</select></label>
+      <label class="f"><span>E-mail <small>(opcional, para retorno da equipe)</small></span><input type="email" id="i-email" data-k="ident.email" autocomplete="email"></label>
     </div>
-    <div class="foot-nav"><span></span><a class="btn primary" href="#${guessArea()}">Começar pela área da sua Câmara →</a></div>
+    <div class="foot-nav"><span class="status" id="eixo-aviso"></span><a class="btn primary" id="btn-comecar" href="#${guessArea()}">Começar pelo eixo selecionado →</a></div>
   </section>
 
   <section class="panel">
@@ -344,7 +365,8 @@ function vInicio(){
   </section>`;
 }
 function linksOf(id,key){ const l=DATA.desafios.filter(d=>d[key].includes(id)).map(d=>'D'+d.n); return l.length?l.join(', '):'<span class="none">sem vínculo</span>'; }
-function guessArea(){ const c=R.ident.camara; const a=DATA.areas.find(a=>a.nome===c); return a?a.id:'edu'; }
+function guessArea(){ return AREA[R.ident.eixo] ? R.ident.eixo : 'edu'; }
+function syncComecar(){ const b=document.getElementById('btn-comecar'); if(!b) return; const a=AREA[R.ident.eixo]; b.href='#'+guessArea(); b.textContent = a ? `Começar por ${a.curto} →` : 'Começar pelo eixo selecionado →'; const w=document.getElementById('eixo-aviso'); if(w) w.textContent = a ? '' : 'Selecione o eixo de desenvolvimento para ir direto à área correspondente.'; }
 
 function vArea(aid){
   const a = AREA[aid];
@@ -359,7 +381,6 @@ function vArea(aid){
 }
 function card(d){
   const k = `d.${d.n}`;
-  const extra = d.nprop - d.prop.length;
   return `<article class="card" id="desafio-${d.n}">
    <header class="card-h"><div class="dnum">${d.n}</div><div>
      <div class="meta"><span class="eyebrow dlabel">Desafio estratégico ${d.n} do Plano · em análise</span><span class="done-mark" id="ok-${d.n}" hidden>✓ avaliado</span></div>
@@ -379,17 +400,12 @@ function card(d){
          <div data-show="${k}.dir.${i}.a" data-when="ajustar,excluir">${txt(`${k}.dir.${i}.txt`,'Nova redação ou justificativa',2)}</div></div>`).join('')}
      </div>
 
-     <div class="q"><div class="q-l">3. Propostas consolidadas na etapa anterior que tocam este desafio</div>
-       <div class="props">${d.prop.length?`<ul>${d.prop.map(p=>`<li><span>${esc(p.t)}</span><span class="org">${esc(p.o)}</span></li>`).join('')}</ul>`:'<p class="none">Nenhuma proposta vinculada na Matriz de Contribuições.</p>'}
-       ${extra>0?`<p class="status">e mais ${extra} proposta${extra>1?'s':''} no painel Ranking Consolidado.</p>`:''}</div>
-     </div>
-
-     <div class="q"><div class="q-l">4. Falta alguma diretriz para este desafio?</div>
-       ${txt(k+'.nd','Escreva a diretriz que falta. Ela pode partir de uma das propostas acima.')}
+     <div class="q"><div class="q-l">3. Falta alguma diretriz para este desafio?</div>
+       ${txt(k+'.nd','Escreva a diretriz que falta e, se possível, por que ela é necessária.')}
        <div class="status">Quais ativos essa nova diretriz mobiliza?</div>${pick(k+'.nda',DATA.ativos,'pa')}
      </div>
 
-     <div class="q"><div class="q-l">5. Relevância do desafio para o horizonte 2050</div>${seg(k+'.rel',[['1','1'],['2','2'],['3','3'],['4','4'],['5','5']],'scale')}<div class="status">1 = baixa · 5 = muito alta</div></div>
+     <div class="q"><div class="q-l">4. Relevância do desafio para o horizonte 2050</div>${seg(k+'.rel',[['1','1'],['2','2'],['3','3'],['4','4'],['5','5']],'scale')}<div class="status">1 = baixa · 5 = muito alta</div></div>
    </div></article>`;
 }
 
@@ -460,15 +476,18 @@ function vEnvio(){
 let ALL=[], unsub=null;
 function vConsol(){
   return `<section class="panel"><h2>Consolidação das respostas</h2>
-   <p class="lead">Visível apenas para a proprietária desta página. Atualiza em tempo real conforme as Câmaras enviam.</p>
+   <p class="lead">Visível apenas para a proprietária desta página. Atualiza em tempo real conforme as instâncias enviam.</p>
    <div class="kpis" id="c-kpis"><div class="kpi"><b>…</b><span>carregando respostas</span></div></div>
    <div class="actions"><button type="button" class="btn" id="btn-csv">Baixar planilha (CSV)</button></div>
    <p class="status" id="c-status"></p></section>
    <section class="panel"><h2>Desafios atuais</h2>
    <div class="legend"><span><i class="b-manter"></i>Manter</span><span><i class="b-ajustar"></i>Ajustar</span><span><i class="b-fundir"></i>Fundir</span><span><i class="b-excluir"></i>Excluir</span></div>
    <div class="tbl-wrap"><table><thead><tr><th>Desafio</th><th>Avaliações</th><th class="num">n</th><th class="num">Relevância média</th><th class="num">Sugestões</th></tr></thead><tbody id="c-des"></tbody></table></div></section>
+   <section class="panel"><div class="novo-h"><h2>Sugestões por desafio</h2><div class="actions"><button type="button" class="btn" id="c-abrir">Expandir todos</button><button type="button" class="btn" id="c-fechar">Recolher todos</button></div></div>
+   <p class="lead">Avaliações, justificativas e redações sugeridas em cada pergunta, por respondente.</p>
+   <div id="c-det" style="display:grid;gap:12px"></div></section>
    <section class="panel"><h2>Lacunas preliminares</h2>
-   <div class="tbl-wrap"><table><thead><tr><th>Lacuna</th><th class="num">Novo desafio</th><th class="num">Nova diretriz</th><th class="num">Contemplado</th></tr></thead><tbody id="c-lac"></tbody></table></div></section>
+   <div class="tbl-wrap"><table><thead><tr><th>Lacuna</th><th class="num">Novo desafio</th><th class="num">Nova diretriz</th><th class="num">Contemplado</th></tr></thead><tbody id="c-lac"></tbody></table></div><div id="c-lac-txt" style="display:grid;gap:10px"></div></section>
    <section class="panel"><h2>Novos desafios e diretrizes propostos</h2><div id="c-novos" style="display:grid;gap:10px"></div></section>`;
 }
 function startConsol(){
@@ -484,13 +503,13 @@ function drawConsol(){
   const cams = new Set(ALL.map(r=>r.ident?.camara).filter(Boolean));
   const insts = new Set(ALL.map(r=>(r.ident?.inst||'').trim().toLowerCase()).filter(Boolean));
   const nNovos = ALL.reduce((s,r)=>s+(r.novos||[]).filter(n=>n.t).length,0);
-  k.innerHTML = [[ALL.length,'respostas'],[insts.size,'instituições'],[cams.size,'Câmaras representadas'],[nNovos,'desafios novos propostos']].map(([n,l])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join('');
+  k.innerHTML = [[ALL.length,'respostas'],[insts.size,'instituições'],[cams.size,'instâncias representadas'],[nNovos,'desafios novos propostos']].map(([n,l])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join('');
   document.getElementById('c-des').innerHTML = DATA.desafios.map(d=>{
     const c={manter:0,ajustar:0,fundir:0,excluir:0}; let rs=0,rn=0,sug=0;
     ALL.forEach(r=>{ const x=r.d?.[d.n]; if(!x) return; if(c[x.av]!=null) c[x.av]++; if(x.rel){rs+=+x.rel;rn++;} if(x.red) sug++; if(x.nd) sug++; Object.values(x.dir||{}).forEach(z=>{ if(z.txt) sug++; }); });
     const n = c.manter+c.ajustar+c.fundir+c.excluir;
     const bar = n?Object.entries(c).map(([kk,v])=>v?`<span class="b-${kk}" style="width:${v/n*100}%" title="${kk}: ${v}"></span>`:'').join(''):'';
-    return `<tr><td><span class="code">D${d.n}</span> ${esc(short(d.t))}</td><td><div class="bar">${bar}</div></td><td class="num">${n}</td><td class="num">${rn?(rs/rn).toFixed(1):'–'}</td><td class="num">${sug}</td></tr>`;
+    return `<tr><td><a class="dlink" href="#consolidacao" data-goto="c-d-${d.n}"><span class="code">D${d.n}</span> ${esc(short(d.t))}</a></td><td><div class="bar">${bar}</div></td><td class="num">${n}</td><td class="num">${rn?(rs/rn).toFixed(1):'–'}</td><td class="num">${sug}</td></tr>`;
   }).join('');
   document.getElementById('c-lac').innerHTML = DATA.lacunas.map(l=>{
     const c={novo_desafio:0,nova_diretriz:0,contemplado:0}; ALL.forEach(r=>{ const o=r.lac?.[l.id]?.op; if(c[o]!=null) c[o]++; });
@@ -503,12 +522,44 @@ function drawConsol(){
     Object.entries(r.d||{}).forEach(([dn,x])=>{ if(x.nd) items.push(`<div class="quote"><b>Nova diretriz para D${dn}:</b> ${esc(x.nd)}<cite>${esc(who)}</cite></div>`); });
   });
   document.getElementById('c-novos').innerHTML = items.length?items.join(''):'<p class="none">Nenhuma proposta textual ainda.</p>';
+  drawDetalhe();
+}
+
+const AVL = Object.fromEntries([...AV_D,...AV_R,...LAC_OP]);
+function quem(r){ return [r.ident?.nome||'Sem nome', r.ident?.inst, r.ident?.camara].filter(Boolean).join(' · '); }
+function pill(v){ return v?`<span class="pill p-${v}">${esc(AVL[v]||v)}</span>`:''; }
+function drawDetalhe(){
+  const el=document.getElementById('c-det'); if(!el) return;
+  el.innerHTML = DATA.areas.map(a=>{
+    const blocos = DATA.desafios.filter(d=>d.area===a.id).map(d=>{
+      const rs = ALL.map(r=>({r, x:r.d?.[d.n]})).filter(o=>o.x && (o.x.av||o.x.red||o.x.rel||o.x.nd||Object.values(o.x.dir||{}).some(z=>z.a||z.txt)));
+      if(!rs.length) return `<details class="det" id="c-d-${d.n}"><summary><span class="code">D${d.n}</span> ${esc(d.t)} <span class="cnt-s">sem respostas</span></summary></details>`;
+      const q1 = rs.filter(o=>o.x.av||o.x.red).map(o=>`<div class="quote">${pill(o.x.av)}${o.x.rel?` <span class="rel">relevância ${esc(o.x.rel)}/5</span>`:''}${o.x.red?`<p>${esc(o.x.red)}</p>`:''}<cite>${esc(quem(o.r))}</cite></div>`).join('');
+      const q2 = d.dir.map((txt,i)=>{
+        const os = rs.filter(o=>{ const z=o.x.dir?.[i]; return z&&(z.a||z.txt); });
+        if(!os.length) return '';
+        return `<div class="det-dir"><p class="det-dt"><span class="code">${d.n}.${i+1}</span> ${esc(txt)}</p>${os.map(o=>{ const z=o.x.dir[i]; return `<div class="quote">${pill(z.a)}${z.txt?`<p>${esc(z.txt)}</p>`:(z.a&&z.a!=='manter'?'<p class="none">Sem redação ou justificativa.</p>':'')}<cite>${esc(quem(o.r))}</cite></div>`; }).join('')}</div>`;
+      }).join('');
+      const q3 = rs.filter(o=>o.x.nd).map(o=>`<div class="quote"><p>${esc(o.x.nd)}</p>${(o.x.nda||[]).length?`<p class="rel">Ativos: ${o.x.nda.map(id=>esc(id+' '+(ATV[id]?.nome||''))).join('; ')}</p>`:''}<cite>${esc(quem(o.r))}</cite></div>`).join('');
+      const nTxt = rs.reduce((s,o)=>s+(o.x.red?1:0)+(o.x.nd?1:0)+Object.values(o.x.dir||{}).filter(z=>z.txt).length,0);
+      return `<details class="det" id="c-d-${d.n}" open><summary><span class="code">D${d.n}</span> ${esc(d.t)} <span class="cnt-s">${rs.length} resposta${rs.length>1?'s':''} · ${nTxt} texto${nTxt===1?'':'s'}</span></summary>
+        <div class="det-b">
+          <div><p class="sec-h">1. Permanência do desafio e justificativas</p>${q1||'<p class="none">Sem avaliação.</p>'}</div>
+          <div><p class="sec-h">2. Diretrizes estratégicas</p>${q2||'<p class="none">Nenhuma diretriz avaliada.</p>'}</div>
+          <div><p class="sec-h">3. Novas diretrizes sugeridas</p>${q3||'<p class="none">Nenhuma.</p>'}</div>
+        </div></details>`;
+    }).join('');
+    return `<h3 class="det-area" style="color:var(--${a.id})">${esc(a.nome)}</h3>${blocos}`;
+  }).join('');
+  const lt=document.getElementById('c-lac-txt');
+  if(lt){ const its=[]; DATA.lacunas.forEach(l=>{ ALL.forEach(r=>{ const x=r.lac?.[l.id]; if(x&&x.txt) its.push(`<div class="quote"><b>${esc(l.t)}</b> ${pill(x.op)}<p>${esc(x.txt)}</p><cite>${esc(quem(r))}</cite></div>`); }); });
+    lt.innerHTML = its.length?`<p class="sec-h" style="margin-top:8px">Redações sugeridas para as lacunas</p>${its.join('')}`:''; }
 }
 function csv(){
-  const rows=[['nome','instituicao','camara','tipo','item','avaliacao','texto','relevancia','ativos']];
+  const rows=[['nome','instituicao','instancia','eixo','tipo','item','avaliacao','texto','relevancia','ativos']];
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   ALL.forEach(r=>{
-    const base=[r.ident?.nome,r.ident?.inst,r.ident?.camara];
+    const base=[r.ident?.nome,r.ident?.inst,r.ident?.camara,AREA[r.ident?.eixo]?.nome||''];
     Object.entries(r.d||{}).forEach(([dn,x])=>{
       if(x.av||x.red||x.rel) rows.push([...base,'desafio','D'+dn,x.av,x.red,x.rel,'']);
       Object.entries(x.dir||{}).forEach(([i,z])=>{ if(z.a||z.txt) rows.push([...base,'diretriz',`D${dn}.${+i+1}`,z.a,z.txt,'','']); });
@@ -539,7 +590,7 @@ function itensDe(r){
 function asText(){
   const L=[]; const lab=(arr,v)=>(arr.find(x=>x[0]===v)||[,''])[1];
   L.push('CONSULTA ÀS CÂMARAS TÉCNICAS · DESAFIOS E DIRETRIZES · PLANO MARANHÃO 2050');
-  L.push(`Nome: ${R.ident.nome}`,`Instituição: ${R.ident.inst}`,`Câmara Técnica: ${R.ident.camara}`,`Cargo: ${R.ident.cargo}`,`E-mail: ${R.ident.email}`,'');
+  L.push(`Nome: ${R.ident.nome}`,`Instituição: ${R.ident.inst}`,`Instância da governança: ${R.ident.camara}`,`Eixo de desenvolvimento: ${AREA[R.ident.eixo]?.nome||''}`,`Cargo: ${R.ident.cargo}`,`E-mail: ${R.ident.email}`,'');
   DATA.areas.forEach(a=>{
     const ds = DATA.desafios.filter(d=>d.area===a.id && R.d[d.n]); if(!ds.length) return;
     L.push('== '+a.nome.toUpperCase());
@@ -596,6 +647,7 @@ function hydrate(root){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e=>{
+  const g = e.target.closest('a[data-goto]'); if(g){ e.preventDefault(); const x=document.getElementById(g.dataset.goto); if(x){ x.open=true; x.scrollIntoView({block:'start'}); } return; }
   const t = e.target.closest('button'); if(!t) return;
   if(t.dataset.view){ location.hash = t.dataset.view; return; }
   if(t.dataset.k && t.dataset.v!=null){ const cur=getP(t.dataset.k); setP(t.dataset.k, cur===t.dataset.v?'':t.dataset.v); changed(); return; }
@@ -606,13 +658,14 @@ document.addEventListener('click', e=>{
   if(t.id==='btn-copiar') copiar();
   if(t.id==='btn-baixar') baixar();
   if(t.id==='btn-csv') baixarCsv();
+  if(t.id==='c-abrir'||t.id==='c-fechar') document.querySelectorAll('details.det').forEach(x=>x.open=(t.id==='c-abrir'));
 });
 document.addEventListener('input', e=>{ const el=e.target; if(el.dataset && el.dataset.k && !el.dataset.v){ setP(el.dataset.k, el.value); changed(); } });
 document.addEventListener('change', e=>{ const el=e.target; if(el.tagName==='SELECT' && el.dataset.k){ setP(el.dataset.k, el.value); changed(); } });
 
 /* ---------- envio ---------- */
 function status(msg,cls=''){ const s=document.getElementById('envio-status'); if(s){ s.className='status '+cls; s.textContent=msg; } }
-function faltando(){ const f=[]; if(!R.ident.nome.trim()) f.push('nome'); if(!R.ident.inst.trim()) f.push('instituição'); if(!R.ident.camara) f.push('Câmara Técnica'); return f; }
+function faltando(){ const f=[]; if(!R.ident.nome.trim()) f.push('nome'); if(!R.ident.inst.trim()) f.push('instituição'); if(!R.ident.camara) f.push('instância da governança'); if(!R.ident.eixo) f.push('eixo de desenvolvimento'); return f; }
 async function enviar(){
   const f=faltando(); if(f.length){ status('Preencha na Apresentação: '+f.join(', ')+'.','err'); return; }
   if(!/^https:\/\/script\.google\.com\//.test(ENDPOINT)){ status('O envio ainda não foi configurado. Use “Copiar respostas em texto” e envie à equipe da SEPLAN.','err'); return; }
@@ -660,7 +713,7 @@ function show(){
   if(v==='consolidacao' && !isAdmin){ location.hash='inicio'; return; }
   app.innerHTML = v==='inicio'?vInicio(): v==='lacunas'?vLacunas(): v==='envio'?vEnvio(): v==='consolidacao'?vConsol(): vArea(v);
   if(v==='lacunas') renderNovos();
-  hydrate(app); updateCounts(); markTab();
+  hydrate(app); updateCounts(); markTab(); syncComecar();
   if(v==='envio') envioLead();
   if(v==='consolidacao') startConsol();
   window.scrollTo(0,0);
